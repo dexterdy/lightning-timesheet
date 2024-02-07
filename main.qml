@@ -13,13 +13,56 @@ ApplicationWindow {
         height: 750
         radius: 8.0
         anchors.centerIn: parent
-        color: "grey"
+        color: "#444444"
+
+        Grid {
+            anchors.margins: 10
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            columns: 2
+            columnSpacing: 5
+            rowSpacing: 5
+            Label {
+                width: parent.width / 2 - 2.5
+                text: "User Story:"
+            }
+            TextField {
+                width: parent.width / 2 - 2.5
+                placeholderText: "Number or Title"
+            }
+            Label {
+                width: parent.width / 2 - 2.5
+                text: "Sub-Ticket (optional):"
+            }
+            TextField {
+                width: parent.width / 2 - 2.5
+                placeholderText: "Number or Title"
+            }
+            Label {
+                width: parent.width / 2 - 2.5
+                text: "Date:"
+            }
+            Item {
+                width: parent.width / 2 - 2.5
+                height: parent.width / 2 - 2.5
+
+                MonthGrid {
+                    width: parent.width
+                    height: parent.height
+
+                    month: 10
+                    year: 2023
+                    locale: Qt.locale("en_US")
+                }
+            }
+        }
     }
     RectangularGlow {
-        color: "#A9A9A9"
+        color: "#353535"
         anchors.fill: logModal
         z: -1
         cornerRadius: 8.0
-        glowRadius: 10
+        glowRadius: 15
     }
 }
