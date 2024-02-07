@@ -62,7 +62,4 @@ if user_auth == "" or user_auth is None:
 
 g = Github(user_auth)
 
-issues = g.get_repo("dexterdy/lightning-timesheet").get_issues()
-print([s.title for s in issues])
-
 sys.exit(app.exec())
