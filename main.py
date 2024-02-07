@@ -1,9 +1,9 @@
 import os
 import sys
 
-from PyQt6.QtGui import QGuiApplication
-from PyQt6.QtQml import QQmlApplicationEngine
-from PyQt6.QtCore import QTimer, QObject, pyqtSignal, pyqtSlot
+from PySide6.QtGui import QGuiApplication
+from PySide6.QtQml import QQmlApplicationEngine
+from PySide6.QtCore import QTimer, QObject, Signal, Slot
 from github import Auth, Github, GithubIntegration
 from dotenv import load_dotenv
 import webbrowser
@@ -38,11 +38,6 @@ class AuthHandler(BaseHTTPRequestHandler):
         ins_id = query["installation_id"][0]
 
 
-with open("./private_key.pem", "r") as pem_file:
-    appAuth = Auth.AppAuth(820437, pem_file.read())
-gi = GithubIntegration(auth=appAuth)
-
-# check wether we are authenticated
 if user_auth == "" or user_auth is None:
     webbrowser.open(install_url, new=0, autoraise=True)
 
@@ -54,6 +49,11 @@ if user_auth == "" or user_auth is None:
         pass
     server.shutdown()
     th.join()
+
+    # app auth, without user auth
+    with open("./private_key.pem", "r") as pem_file:
+        appAuth = Auth.AppAuth(820437, pem_file.read())
+    gi = GithubIntegration(auth=appAuth)
 
     # get user access token
     user_auth = gi.get_access_token(int(ins_id)).token
