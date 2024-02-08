@@ -1,6 +1,8 @@
 import QtQuick
 import QtQuick.Controls
 import Qt5Compat.GraphicalEffects
+import QtQuick.Layouts
+import QtQml
 
 ApplicationWindow {
     visible: true
@@ -15,47 +17,57 @@ ApplicationWindow {
         anchors.centerIn: parent
         color: "#444444"
 
-        Grid {
-            anchors.margins: 10
+        ColumnLayout {
+            anchors.margins: 20
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
-            columns: 2
-            columnSpacing: 5
-            rowSpacing: 5
+            spacing: 15
             Label {
-                width: parent.width / 2 - 2.5
+                Layout.alignment: Qt.AlignHCenter
                 text: "User Story:"
             }
             TextField {
-                width: parent.width / 2 - 2.5
+                Layout.alignment: Qt.AlignHCenter
+                Layout.preferredWidth: parent.width - 100
                 placeholderText: "Number or Title"
             }
             Label {
-                width: parent.width / 2 - 2.5
+                Layout.alignment: Qt.AlignHCenter
+                width: parent.width
                 text: "Sub-Ticket (optional):"
             }
             TextField {
-                width: parent.width / 2 - 2.5
+                Layout.alignment: Qt.AlignHCenter
+                Layout.preferredWidth: parent.width - 100
                 placeholderText: "Number or Title"
             }
             Label {
-                width: parent.width / 2 - 2.5
+                Layout.alignment: Qt.AlignHCenter
+                width: parent.width
                 text: "Date:"
             }
-            Item {
-                width: parent.width / 2 - 2.5
-                height: parent.width / 2 - 2.5
-
-                MonthGrid {
-                    width: parent.width
-                    height: parent.height
-
-                    month: 10
-                    year: 2023
-                    locale: Qt.locale("en_US")
+            Row {
+                Layout.alignment: Qt.AlignHCenter
+                Layout.preferredWidth: parent.width - 100
+                spacing: 5
+                TextField {
+                    width: parent.width / 2 - 10 / 3
+                    placeholderText: "YYYY"
+                    inputMask: "9999"
+                }
+                TextField {
+                    width: parent.width / 4 - 10 / 3
+                    placeholderText: "MM"
+                    inputMask: "99"
+                }
+                TextField {
+                    width: parent.width / 4 - 10 / 3
+                    placeholderText: "DD"
+                    inputMask: "99"
                 }
             }
+            
         }
     }
     RectangularGlow {
