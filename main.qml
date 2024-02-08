@@ -52,19 +52,22 @@ ApplicationWindow {
                 Layout.preferredWidth: parent.width - 100
                 spacing: 5
                 TextField {
+                    validator: IntValidator {}
+                    maximumLength: 4
                     width: parent.width / 2 - 10 / 3
                     placeholderText: "YYYY"
-                    inputMask: "9999"
                 }
                 TextField {
+                    validator: IntValidator {}
+                    maximumLength: 2
                     width: parent.width / 4 - 10 / 3
                     placeholderText: "MM"
-                    inputMask: "99"
                 }
                 TextField {
+                    validator: IntValidator {}
+                    maximumLength: 2
                     width: parent.width / 4 - 10 / 3
                     placeholderText: "DD"
-                    inputMask: "99"
                 }
             }
             
