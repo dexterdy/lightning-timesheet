@@ -19,12 +19,6 @@ client_id = "Iv1.d6a13760097bc4c6"
 app_id = 820437
 install_url = "https://github.com/apps/lightning-timesheets/installations/new"
 
-app = QGuiApplication(sys.argv)
-
-engine = QQmlApplicationEngine()
-engine.quit.connect(app.quit)
-engine.load("main.qml")
-
 
 class AuthHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -61,5 +55,18 @@ if user_auth == "" or user_auth is None:
         f.write(f"\nUSER_AUTH={user_auth}\nINS_ID={ins_id}\n")
 
 g = Github(user_auth)
+
+
+class Backend(QObject):
+    def __init__(self):
+        super().__init__()
+
+
+app = QGuiApplication(sys.argv)
+engine = QQmlApplicationEngine()
+backend = Backend()
+engine.quit.connect(app.quit)
+engine.load("main.qml")
+engine.rootObjects()[0].setProperty("backend", backend)
 
 sys.exit(app.exec())
