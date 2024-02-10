@@ -26,18 +26,6 @@ Item {
             cursorShape: Qt.PointingHandCursor
         }
 
-        Rectangle {
-            anchors.top: parent.top
-            ListView {
-                width: 100
-                height: 100
-                model: backend.issues
-                delegate: Text {
-                    text: title
-                }
-            }
-        }
-
         ColumnLayout {
             anchors.margins: 50
             anchors.leftMargin: 75
@@ -52,21 +40,19 @@ Item {
                     anchors.top: parent.top
                     Label {
                         Layout.bottomMargin: 5
-                        text: "User Story:"
+                        text: "Ticket:"
                     }
-                    TextField {
+                    TicketInput {
                         Layout.preferredWidth: parent.width
                         Layout.bottomMargin: 15
-                        placeholderText: "Number or Title"
                     }
                     Label {
                         Layout.bottomMargin: 5
-                        text: "Sub-Ticket (optional):"
+                        text: "User Story (optional):"
                     }
-                    TextField {
+                    TicketInput {
                         Layout.preferredWidth: parent.width
                         Layout.bottomMargin: 15
-                        placeholderText: "Number or Title"
                     }
                     Label {
                         Layout.bottomMargin: 5

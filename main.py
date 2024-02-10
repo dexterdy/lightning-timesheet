@@ -1,23 +1,19 @@
-from dataclasses import fields
-import os
-import re
 import sys
 from typing import Any, Dict
-
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtCore import QObject, QAbstractListModel, QModelIndex, Property, Signal
 from github import Auth, Github, GithubIntegration
-from dotenv import load_dotenv
+from dotenv import dotenv_values, set_key
 import webbrowser
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import urllib.parse
 from threading import Thread
 
-load_dotenv(".env", override=True)
-client_secret = os.getenv("CLIENT_SECRET")
-user_auth = os.getenv("USER_AUTH")
-ins_id = os.getenv("INS_ID")
+cfg = dotenv_values(".env")
+client_secret = cfg.get("CLIENT_SECRET")
+user_auth = cfg.get("USER_AUTH")
+ins_id = cfg.get("INS_ID")
 client_id = "Iv1.d6a13760097bc4c6"
 app_id = 820437
 install_url = "https://github.com/apps/lightning-timesheets/installations/new"
@@ -57,8 +53,8 @@ def authenticate():
 
     # get user access token
     user_auth = gi.get_access_token(int(ins_id)).token
-    with open(".env", "a") as f:
-        f.write(f"\nUSER_AUTH={user_auth}\nINS_ID={ins_id}\n")
+    set_key(".env", "USER_AUTH", user_auth)
+    set_key(".env", "INS_ID", ins_id)
 
 
 if user_auth == "" or user_auth is None:
