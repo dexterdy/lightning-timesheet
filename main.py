@@ -1,9 +1,12 @@
+from dataclasses import fields
 import os
+import re
 import sys
+from typing import Any, Dict
 
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
-from PySide6.QtCore import QTimer, QObject, Signal, Slot
+from PySide6.QtCore import QObject, QAbstractListModel, QModelIndex, Property, Signal
 from github import Auth, Github, GithubIntegration
 from dotenv import load_dotenv
 import webbrowser
@@ -11,7 +14,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import urllib.parse
 from threading import Thread
 
-load_dotenv(".env")
+load_dotenv(".env", override=True)
 client_secret = os.getenv("CLIENT_SECRET")
 user_auth = os.getenv("USER_AUTH")
 ins_id = os.getenv("INS_ID")
@@ -32,17 +35,20 @@ class AuthHandler(BaseHTTPRequestHandler):
         ins_id = query["installation_id"][0]
 
 
-if user_auth == "" or user_auth is None:
-    webbrowser.open(install_url, new=0, autoraise=True)
+def authenticate():
+    global user_auth
+    global ins_id
+    if ins_id == "" or ins_id is None:
+        webbrowser.open(install_url, new=0, autoraise=True)
 
-    # handle response (ins_id is in query params)
-    server = HTTPServer(("localhost", 9156), AuthHandler)
-    th = Thread(target=server.serve_forever)
-    th.start()
-    while ins_id is None:
-        pass
-    server.shutdown()
-    th.join()
+        # handle response (ins_id is in query params)
+        server = HTTPServer(("localhost", 9156), AuthHandler)
+        th = Thread(target=server.serve_forever)
+        th.start()
+        while ins_id is None or ins_id == "":
+            pass
+        server.shutdown()
+        th.join()
 
     # app auth, without user auth
     with open("./private_key.pem", "r") as pem_file:
@@ -54,19 +60,58 @@ if user_auth == "" or user_auth is None:
     with open(".env", "a") as f:
         f.write(f"\nUSER_AUTH={user_auth}\nINS_ID={ins_id}\n")
 
-g = Github(user_auth)
+
+if user_auth == "" or user_auth is None:
+    authenticate()
+
+try:
+    g = Github(user_auth)
+    g.get_repo("dexterdy/lightning-pipelines")
+except:
+    authenticate()
+    g = Github(user_auth)
+
+
+class IssuesList(QAbstractListModel):
+    def __init__(self):
+        super().__init__()
+        self.issues = list(g.get_repo("dexterdy/lightning-pipelines").get_issues())
+
+    def data(self, index: QModelIndex, role: int = 0) -> Any:
+        if 0 <= index.row() < self.rowCount():
+            issue = self.issues[index.row()]
+            field = self.roleNames().get(role)
+            if field:
+                return getattr(issue, field.decode())
+
+    def roleNames(self) -> Dict[int, bytes]:
+        d = {
+            0: "title".encode(),
+            1: "number".encode(),
+        }
+        return d
+
+    def rowCount(self, index: QModelIndex | None = None) -> int:
+        return len(self.issues)
 
 
 class Backend(QObject):
+    issuesChanged = Signal(QObject)
+
     def __init__(self):
         super().__init__()
+        self._issues = IssuesList()
+
+    @Property(QObject, notify=issuesChanged)  # type: ignore
+    def issues(self):
+        return self._issues
 
 
 app = QGuiApplication(sys.argv)
 engine = QQmlApplicationEngine()
 backend = Backend()
 engine.quit.connect(app.quit)
+engine.rootContext().setContextProperty("backend", backend)
 engine.load("main.qml")
-engine.rootObjects()[0].setProperty("backend", backend)
 
 sys.exit(app.exec())

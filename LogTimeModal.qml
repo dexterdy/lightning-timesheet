@@ -17,10 +17,27 @@ Item {
         color: "#444444"
 
         Icon {
+            id: exit
             icon: MD.icons.close
             anchors.right: parent.right
         }
-        
+        HoverHandler {
+            parent: exit
+            cursorShape: Qt.PointingHandCursor
+        }
+
+        Rectangle {
+            anchors.top: parent.top
+            ListView {
+                width: 100
+                height: 100
+                model: backend.issues
+                delegate: Text {
+                    text: title
+                }
+            }
+        }
+
         ColumnLayout {
             anchors.margins: 50
             anchors.leftMargin: 75
@@ -89,7 +106,7 @@ Item {
                             Row {
                                 width: parent.width
                                 spacing: 7
-                                    TextField {
+                                TextField {
                                     validator: IntValidator {}
                                     maximumLength: 2
                                     width: 40
