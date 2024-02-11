@@ -59,7 +59,7 @@ Item {
                     }
                     Label {
                         Layout.bottomMargin: 5
-                        text: "Date:"
+                        text: "Date (optional, defaults to today):"
                     }
                     Row {
                         Layout.preferredWidth: parent.width
@@ -72,6 +72,7 @@ Item {
                             maximumLength: 4
                             width: parent.width / 2 - 10 / 3
                             placeholderText: "YYYY"
+                            text: backend.defaultYear
                         }
                         TextField {
                             id: month
@@ -80,6 +81,7 @@ Item {
                             maximumLength: 2
                             width: parent.width / 4 - 10 / 3
                             placeholderText: "MM"
+                            text: backend.defaultMonth
                         }
                         TextField {
                             id: day
@@ -88,6 +90,7 @@ Item {
                             maximumLength: 2
                             width: parent.width / 4 - 10 / 3
                             placeholderText: "DD"
+                            text: backend.defaultDay
                         }
                     }
                     Row {
@@ -194,8 +197,8 @@ Item {
                 Button {
                     text: "Cancel"
                     onClicked: {
-                        resetUI();
                         backend.reset();
+                        resetUI();
                     }
                 }
             }
@@ -211,9 +214,6 @@ Item {
     function checkRequiredFields() {
         let error = false;
         error = ticketInput.text === "";
-        error = year.text === "";
-        error = month.text === "";
-        error = day.text === "";
         error = fromHour.text === "";
         error = fromMinute.text === "";
         error = tillHour.text === "";
@@ -225,9 +225,9 @@ Item {
     function resetUI() {
         ticketInput.reset();
         userStoryInput.reset();
-        year.text = "";
-        month.text = "";
-        day.text = "";
+        year.text = backend.defaultYear;
+        month.text = backend.defaultMonth;
+        day.text = backend.defaultDay;
         fromHour.text = "";
         fromMinute.text = "";
         tillHour.text = "";

@@ -120,11 +120,11 @@ class Backend(QObject):
 
     @Property(str, constant=True)  # type: ignore
     def defaultMonth(self):
-        return str(self.date.month)
+        return "%02d" % self.date.month
 
     @Property(str, constant=True)  # type: ignore
     def defaultDay(self):
-        return str(self.date.day)
+        return "%02d" % self.date.day
 
 
 app = QGuiApplication(sys.argv)
