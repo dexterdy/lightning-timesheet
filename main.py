@@ -8,7 +8,7 @@ import globals
 from githubIssuesModel import GithubIssuesModel
 import json
 from enum import Enum
-from export import exportMD
+from export import exportMD, exportExcel
 
 
 class ExportType(Enum):
@@ -27,6 +27,15 @@ except:
 
 
 exportMD(
+    timeSheet,
+    list(
+        globals.getGithubInstance()
+        .get_repo("dexterdy/lightning-pipelines")
+        .get_issues()
+    ),
+)
+
+exportExcel(
     timeSheet,
     list(
         globals.getGithubInstance()

@@ -1,16 +1,22 @@
 import typing
-from pytablewriter import MarkdownTableWriter
+from pytablewriter import AbstractTableWriter, MarkdownTableWriter, ExcelXlsxTableWriter
 from datetime import datetime
 from github.Issue import Issue
 
 
-def exportMD(logs: list[dict[str, typing.Any]], issues: list[Issue]):
+def _exportGeneric(
+    logs: list[dict[str, typing.Any]],
+    issues: list[Issue],
+    writer: type,
+    linkFormatter: typing.Callable[[Issue], str],
+    filename: str,
+):
     def mapLambda(x: dict[str, typing.Any]) -> list[typing.Any]:
         ticket = issues[x["ticket"] - 1]
-        ticketStr = f"[{ticket.title}]({ticket.url})"
+        ticketStr = linkFormatter(ticket)
         if "userStory" in x:
             userStory = issues[x["userStory"] - 1]
-            userStoryStr = f"[{userStory.title}]({userStory.url})"
+            userStoryStr = linkFormatter(userStory)
         else:
             userStoryStr = ""
         fromTime = x["fromTime"]
@@ -32,9 +38,29 @@ def exportMD(logs: list[dict[str, typing.Any]], issues: list[Issue]):
 
     matrix = list(map(mapLambda, logs))
     matrix.sort(key=lambda x: datetime.fromisoformat(str(x[2])))
-    writer = MarkdownTableWriter(
+    writer = writer(
         table_name="time sheet",
         headers=["ticket", "user story", "from", "till", "description", "duration"],
         value_matrix=matrix,
     )
-    writer.dump("timeSheet.md")
+    writer.dump(filename)
+
+
+def exportMD(logs: list[dict[str, typing.Any]], issues: list[Issue]):
+    _exportGeneric(
+        logs,
+        issues,
+        MarkdownTableWriter,
+        lambda ticket: f"[{ticket.title}]({ticket.url})",
+        "timeSheet.md",
+    )
+
+
+def exportExcel(logs: list[dict[str, typing.Any]], issues: list[Issue]):
+    _exportGeneric(
+        logs,
+        issues,
+        ExcelXlsxTableWriter,
+        lambda ticket: f'=HYPERLINK("{ticket.url}","{ticket.title}")',
+        "timeSheet.xlsx",
+    )
