@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import GithubIssuesModel 1.0
 
 Item {
     implicitWidth: input.implicitWidth
@@ -7,9 +8,12 @@ Item {
     TextField {
         id: input
         anchors.fill: parent
-        placeholderText: "Number or Title"
+        placeholderText: "Ticket Title"
         onPressed: openPopup()
-        onTextEdited: openPopup()
+        onTextEdited: {
+            issuesList.model.filterIssues(this.text)
+            openPopup()
+        }
     }
     Popup {
         id: popup
@@ -21,8 +25,9 @@ Item {
         ScrollView {
             anchors.fill: parent
             ListView {
+                id: issuesList
                 clip: true
-                model: backend.issues
+                model: GithubIssuesModel {}
                 delegate: Button {
                     text: title
                 }
