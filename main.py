@@ -8,6 +8,14 @@ import globals
 from githubIssuesModel import GithubIssuesModel
 import json
 
+from enum import Enum
+
+
+class ExportType(Enum):
+    MD = 1
+    EXCEL = 2
+
+
 try:
     with open("storedLogs.json", "r") as storeFile:
         timeSheet: list[dict[str, typing.Any]] = json.load(storeFile)["timeSheet"]
@@ -114,6 +122,10 @@ class Backend(QObject):
         self.tillTime = None
         self.description = ""
 
+    @Slot(ExportType)
+    def export(self, type: ExportType):
+        pass
+
     @Property(str, constant=True)  # type: ignore
     def defaultYear(self):
         return str(self.date.year)
@@ -132,6 +144,6 @@ engine = QQmlApplicationEngine()
 backend = Backend()
 engine.quit.connect(app.quit)
 engine.rootContext().setContextProperty("backend", backend)
-engine.load("main.qml")
+engine.load("./qml/main.qml")
 
 sys.exit(app.exec())

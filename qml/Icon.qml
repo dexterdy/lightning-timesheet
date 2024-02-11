@@ -1,4 +1,5 @@
 import QtQuick
+
 Text {
     required property string icon
     default property int size: 32

@@ -10,7 +10,8 @@ ApplicationWindow {
     title: "Lightning Timesheet"
     FontLoader {
         id: iconFont
-        source: "./fonts/MaterialIcons-Regular.ttf"
+        source: "../icons/MaterialIcons-Regular.ttf"
     }
-    LogTimeModal {}
+    LogTimeModal {
+    }
 }

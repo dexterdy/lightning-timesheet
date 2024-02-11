@@ -3,7 +3,7 @@ import QtQuick.Controls
 import Qt5Compat.GraphicalEffects
 import QtQuick.Layouts
 import QtQml
-import "MaterialDesign.js" as MD
+import "../icons/MaterialDesign.js" as MD
 
 Item {
     anchors.fill: parent
