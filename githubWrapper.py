@@ -1,4 +1,5 @@
 from github import Auth, Github, GithubIntegration
+from github.Issue import Issue
 from dotenv import dotenv_values, set_key
 import webbrowser
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -12,6 +13,7 @@ ins_id = cfg.get("INS_ID")
 client_id = "Iv1.d6a13760097bc4c6"
 app_id = 820437
 install_url = "https://github.com/apps/lightning-timesheets/installations/new"
+g = None
 
 
 class AuthHandler(BaseHTTPRequestHandler):
@@ -54,13 +56,24 @@ def authenticate():
 if user_auth == "" or user_auth is None:
     authenticate()
 
-try:
-    g = Github(user_auth)
-    g.get_repo("dexterdy/lightning-pipelines")
-except:
-    authenticate()
-    g = Github(user_auth)
 
-
-def getGithubInstance() -> Github:
+def getGithub():
+    global g
+    try:
+        if g is None:
+            g = Github(user_auth)
+        g.get_repo("dexterdy/lightning-pipelines")  # just to test
+    except:
+        authenticate()
+        g = Github(user_auth)
     return g
+
+
+def getIssues() -> list[Issue]:
+    g = getGithub()
+    try:
+        return list(g.get_repo("dexterdy/lightning-pipelines").get_issues())
+    except:
+        authenticate()
+        g = Github(user_auth)
+        return list(g.get_repo("dexterdy/lightning-pipelines").get_issues())

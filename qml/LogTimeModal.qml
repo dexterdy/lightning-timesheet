@@ -6,7 +6,9 @@ import QtQml
 import "../icons/MaterialDesign.js" as MD
 
 Item {
+    id: modalContainer
     anchors.fill: parent
+    visible: false
     Rectangle {
         id: logModal
         width: 500
@@ -23,6 +25,12 @@ Item {
         HoverHandler {
             parent: exit
             cursorShape: Qt.PointingHandCursor
+        }
+        TapHandler {
+            parent: exit
+            onTapped: {
+                modalContainer.visible = false;
+            }
         }
 
         ColumnLayout {
@@ -99,7 +107,7 @@ Item {
                             width: parent.width / 2
                             spacing: 7
                             Label {
-                                text: "from:"
+                                text: "From:"
                             }
                             Row {
                                 width: parent.width
@@ -126,7 +134,7 @@ Item {
                             width: parent.width / 2
                             spacing: 10
                             Label {
-                                text: "till:"
+                                text: "Till:"
                             }
                             Row {
                                 width: parent.width
@@ -210,6 +218,11 @@ Item {
         z: -1
         cornerRadius: 8.0
         glowRadius: 15
+    }
+    function open() {
+        modalContainer.visible = true;
+        ticketInput.updateIssues();
+        userStoryInput.updateIssues();
     }
     function checkRequiredFields() {
         let error = false;

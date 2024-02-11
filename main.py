@@ -1,19 +1,15 @@
+from concurrent.futures import thread
 from datetime import datetime, date
 import sys
+from threading import Thread
 import typing
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtCore import QObject, Slot, Property
-import globals
+from githubWrapper import getIssues
 from githubIssuesModel import GithubIssuesModel
 import json
-from enum import Enum
 from export import exportMD, exportExcel
-
-
-class ExportType(Enum):
-    MD = 1
-    EXCEL = 2
 
 
 try:
@@ -24,25 +20,6 @@ except:
         storeFile.write('{"timeSheet": []}')
     with open("storedLogs.json", "r") as storeFile:
         timeSheet: list[dict[str, typing.Any]] = json.load(storeFile)["timeSheet"]
-
-
-exportMD(
-    timeSheet,
-    list(
-        globals.getGithubInstance()
-        .get_repo("dexterdy/lightning-pipelines")
-        .get_issues()
-    ),
-)
-
-exportExcel(
-    timeSheet,
-    list(
-        globals.getGithubInstance()
-        .get_repo("dexterdy/lightning-pipelines")
-        .get_issues()
-    ),
-)
 
 
 class Backend(QObject):
@@ -89,7 +66,7 @@ class Backend(QObject):
             )
             return ""
         except:
-            return "Could not set 'from' time. Please ensure the time is valid."
+            return "Could not set 'From' time. Please ensure the time is valid."
 
     @Slot(int, int, result=str)
     def setTillTime(self, hh, mm):
@@ -101,7 +78,7 @@ class Backend(QObject):
             )
             return ""
         except:
-            return "Could not set 'till' time. Please ensure the time is valid."
+            return "Could not set 'Till' time. Please ensure the time is valid."
 
     @Slot(str)
     def setDescription(self, description: str):
@@ -117,7 +94,7 @@ class Backend(QObject):
         ):
             return "All required fields must be set before submission."
         if self.tillTime <= self.fromTime:
-            return "'Till' time must be later than 'from' time."
+            return "'Till' time must be later than 'From' time."
         timeSheet.append(
             {
                 "ticket": self.selectedTicket,
@@ -141,19 +118,12 @@ class Backend(QObject):
         self.tillTime = None
         self.description = ""
 
-    @Slot(ExportType)
-    def export(self, type: ExportType):
-        if type == ExportType.MD:
-            exportMD(
-                timeSheet,
-                list(
-                    globals.getGithubInstance()
-                    .get_repo("dexterdy/lightning-pipelines")
-                    .get_issues()
-                ),
-            )
-        elif type == ExportType.EXCEL:
-            pass
+    @Slot(int)
+    def export(self, type: int):
+        if type == 1:
+            exportMD(timeSheet, getIssues())
+        elif type == 2:
+            exportExcel(timeSheet, getIssues())
 
     @Property(str, constant=True)  # type: ignore
     def defaultYear(self):
@@ -175,4 +145,5 @@ engine.quit.connect(app.quit)
 engine.rootContext().setContextProperty("backend", backend)
 engine.load("./qml/main.qml")
 
-sys.exit(app.exec())
+exitCode = app.exec()
+sys.exit(exitCode)

@@ -58,4 +58,7 @@ Item {
         input.readOnly = false;
         input.text = "";
     }
+    function updateIssues() {
+        issues.updateIssues();
+    }
 }

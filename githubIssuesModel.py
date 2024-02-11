@@ -1,3 +1,4 @@
+from threading import Thread
 from typing import Any, Dict
 from PySide6.QtCore import (
     QAbstractListModel,
@@ -6,7 +7,7 @@ from PySide6.QtCore import (
 )
 from PySide6.QtQml import QmlElement
 from thefuzz import process, fuzz
-from globals import getGithubInstance
+from githubWrapper import getIssues
 from github.Issue import Issue
 
 QML_IMPORT_NAME = "GithubIssuesModel"
@@ -17,8 +18,7 @@ QML_IMPORT_MAJOR_VERSION = 1
 class GithubIssuesModel(QAbstractListModel):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
-        g = getGithubInstance()
-        self.issues = list(g.get_repo("dexterdy/lightning-pipelines").get_issues())
+        self.issues = getIssues()
         self.filteredIssues = self.issues[:7]
 
     def data(self, index: QModelIndex, role: int = 0) -> Any:
@@ -58,6 +58,20 @@ class GithubIssuesModel(QAbstractListModel):
             )
             self.filteredIssues = [x[0] for x in result]
         self.endInsertRows()
+
+    @Slot()
+    def updateIssues(self):
+        def internal():
+            self.issues = getIssues()
+            self.beginRemoveRows(QModelIndex(), 0, 6)
+            self.filteredIssues = []
+            self.endRemoveRows()
+            self.beginInsertRows(QModelIndex(), 0, 6)
+            self.reset()
+            self.endInsertRows()
+
+        backgroundFetch = Thread(target=internal)
+        backgroundFetch.start()
 
     def reset(self):
         self.filteredIssues = self.issues[:7]
