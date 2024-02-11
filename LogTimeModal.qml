@@ -186,8 +186,9 @@ Item {
                         backend.setDescription(description.text);
                         if (err === "")
                             err = backend.submit();
-                        console.log(err);
                         error.text = err;
+                        if (err === "")
+                            resetUI();
                     }
                 }
                 Button {

@@ -1,10 +1,21 @@
-from datetime import datetime
+from datetime import datetime, date
 import sys
+import typing
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtCore import QObject, Slot, Property
 import globals
 from githubIssuesModel import GithubIssuesModel
+import json
+
+try:
+    with open("storedLogs.json", "r") as storeFile:
+        timeSheet: list[dict[str, typing.Any]] = json.load(storeFile)["timeSheet"]
+except:
+    with open("storedLogs.json", "w") as storeFile:
+        storeFile.write('{"timeSheet": []}')
+    with open("storedLogs.json", "r") as storeFile:
+        timeSheet: list[dict[str, typing.Any]] = json.load(storeFile)["timeSheet"]
 
 
 class Backend(QObject):
@@ -12,7 +23,7 @@ class Backend(QObject):
         super().__init__()
         self.selectedTicket: str | int | None = None
         self.selectedUserStory: str | int | None = None
-        self.date: datetime = datetime.now()
+        self.date: date = date.today()
         self.fromTime: datetime | None = None
         self.tillTime: datetime | None = None
         self.description: str = ""
@@ -80,28 +91,40 @@ class Backend(QObject):
             return "All required fields must be set before submission."
         if self.tillTime <= self.fromTime:
             return "'Till' time must be later than 'from' time."
+        timeSheet.append(
+            {
+                "ticket": self.selectedTicket,
+                "userStory": self.selectedUserStory,
+                "fromTime": self.fromTime.isoformat(),
+                "tillTime": self.tillTime.isoformat(),
+                "description": self.description,
+            }
+        )
+        with open("storedLogs.json", "w") as storeFile:
+            json.dump({"timeSheet": timeSheet}, storeFile)
+        self.reset()
         return ""
 
     @Slot()
     def reset(self):
         self.selectedTicket = None
         self.selectedUserStory = None
-        self.date = datetime.now()
+        self.date = date.today()
         self.fromTime = None
         self.tillTime = None
         self.description = ""
 
     @Property(str, constant=True)  # type: ignore
     def defaultYear(self):
-        return str(datetime.now().year)
+        return str(self.date.year)
 
     @Property(str, constant=True)  # type: ignore
     def defaultMonth(self):
-        return str(datetime.now().month)
+        return str(self.date.month)
 
     @Property(str, constant=True)  # type: ignore
     def defaultDay(self):
-        return str(datetime.now().day)
+        return str(self.date.day)
 
 
 app = QGuiApplication(sys.argv)
