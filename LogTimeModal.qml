@@ -2,7 +2,6 @@ import QtQuick
 import QtQuick.Controls
 import Qt5Compat.GraphicalEffects
 import QtQuick.Layouts
-import QtLocation
 import QtQml
 import "MaterialDesign.js" as MD
 
@@ -11,7 +10,7 @@ Item {
     Rectangle {
         id: logModal
         width: 500
-        height: 500
+        height: 600
         radius: 8.0
         anchors.centerIn: parent
         color: "#444444"
@@ -43,16 +42,20 @@ Item {
                         text: "Ticket:"
                     }
                     TicketInput {
+                        id: ticketInput
                         Layout.preferredWidth: parent.width
                         Layout.bottomMargin: 15
+                        onSelect: number => backend.selectTicket(number)
                     }
                     Label {
                         Layout.bottomMargin: 5
                         text: "User Story (optional):"
                     }
                     TicketInput {
+                        id: userStoryInput
                         Layout.preferredWidth: parent.width
                         Layout.bottomMargin: 15
+                        onSelect: number => backend.selectUserStory(number)
                     }
                     Label {
                         Layout.bottomMargin: 5
@@ -63,19 +66,25 @@ Item {
                         Layout.bottomMargin: 15
                         spacing: 5
                         TextField {
-                            validator: IntValidator {}
+                            id: year
+                            validator: IntValidator {
+                            }
                             maximumLength: 4
                             width: parent.width / 2 - 10 / 3
                             placeholderText: "YYYY"
                         }
                         TextField {
-                            validator: IntValidator {}
+                            id: month
+                            validator: IntValidator {
+                            }
                             maximumLength: 2
                             width: parent.width / 4 - 10 / 3
                             placeholderText: "MM"
                         }
                         TextField {
-                            validator: IntValidator {}
+                            id: day
+                            validator: IntValidator {
+                            }
                             maximumLength: 2
                             width: parent.width / 4 - 10 / 3
                             placeholderText: "DD"
@@ -93,13 +102,17 @@ Item {
                                 width: parent.width
                                 spacing: 7
                                 TextField {
-                                    validator: IntValidator {}
+                                    id: fromHour
+                                    validator: IntValidator {
+                                    }
                                     maximumLength: 2
                                     width: 40
                                     placeholderText: "HH"
                                 }
                                 TextField {
-                                    validator: IntValidator {}
+                                    id: fromMinute
+                                    validator: IntValidator {
+                                    }
                                     maximumLength: 2
                                     width: 40
                                     placeholderText: "MM"
@@ -116,19 +129,44 @@ Item {
                                 width: parent.width
                                 spacing: 7
                                 TextField {
-                                    validator: IntValidator {}
+                                    id: tillHour
+                                    validator: IntValidator {
+                                    }
                                     maximumLength: 2
                                     width: 40
                                     placeholderText: "HH"
                                 }
                                 TextField {
-                                    validator: IntValidator {}
+                                    id: tillMinute
+                                    validator: IntValidator {
+                                    }
                                     maximumLength: 2
                                     width: 40
                                     placeholderText: "MM"
                                 }
                             }
                         }
+                    }
+                    Label {
+                        Layout.bottomMargin: 5
+                        text: "Description (optional):"
+                    }
+                    TextField {
+                        id: description
+                        verticalAlignment: TextInput.AlignTop
+                        Layout.preferredWidth: parent.width
+                        width: parent.width
+                        Layout.preferredHeight: 100
+                        wrapMode: TextInput.Wrap
+                        Layout.bottomMargin: 15
+                    }
+                    Label {
+                        id: error
+                        width: parent.width
+                        Layout.bottomMargin: 5
+                        text: ""
+                        color: "red"
+                        wrapMode: Text.Wrap
                     }
                 }
             }
@@ -137,9 +175,27 @@ Item {
                 spacing: 5
                 Button {
                     text: "Save"
+                    onClicked: {
+                        let err = checkRequiredFields();
+                        if (err === "")
+                            err = backend.setDate(Number(year.text), Number(month.text), Number(day.text));
+                        if (err === "")
+                            err = backend.setFromTime(Number(fromHour.text), Number(fromMinute.text));
+                        if (err === "")
+                            err = backend.setTillTime(Number(tillHour.text), Number(tillMinute.text));
+                        backend.setDescription(description.text);
+                        if (err === "")
+                            err = backend.submit();
+                        console.log(err);
+                        error.text = err;
+                    }
                 }
                 Button {
                     text: "Cancel"
+                    onClicked: {
+                        resetUI();
+                        backend.reset();
+                    }
                 }
             }
         }
@@ -150,5 +206,31 @@ Item {
         z: -1
         cornerRadius: 8.0
         glowRadius: 15
+    }
+    function checkRequiredFields() {
+        let error = false;
+        error = ticketInput.text === "";
+        error = year.text === "";
+        error = month.text === "";
+        error = day.text === "";
+        error = fromHour.text === "";
+        error = fromMinute.text === "";
+        error = tillHour.text === "";
+        error = tillMinute.text === "";
+        if (error)
+            return "All required fields must be set before submission.";
+        return "";
+    }
+    function resetUI() {
+        ticketInput.reset();
+        userStoryInput.reset();
+        year.text = "";
+        month.text = "";
+        day.text = "";
+        fromHour.text = "";
+        fromMinute.text = "";
+        tillHour.text = "";
+        tillMinute.text = "";
+        description.text = "";
     }
 }

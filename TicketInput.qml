@@ -1,18 +1,27 @@
 import QtQuick
 import QtQuick.Controls
-import GithubIssuesModel 1.0
+import GithubIssuesModel
 
 Item {
+    id: root
+    signal select(int number)
+    property alias text: input.text
     implicitWidth: input.implicitWidth
     implicitHeight: input.implicitHeight
     TextField {
         id: input
         anchors.fill: parent
         placeholderText: "Ticket Title"
-        onPressed: openPopup()
+        onPressed: {
+            if (this.readOnly) {
+                this.text = "";
+                this.readOnly = false;
+            }
+            openPopup();
+        }
         onTextEdited: {
-            issuesList.model.filterIssues(this.text)
-            openPopup()
+            issues.filterIssues(this.text);
+            openPopup();
         }
     }
     Popup {
@@ -25,20 +34,28 @@ Item {
         ScrollView {
             anchors.fill: parent
             ListView {
-                id: issuesList
                 clip: true
-                model: GithubIssuesModel {}
+                model: GithubIssuesModel {
+                    id: issues
+                }
                 delegate: Button {
                     text: title
+                    onClicked: {
+                        input.text = title;
+                        input.readOnly = true;
+                        root.select(number);
+                    }
                 }
             }
         }
     }
-    function openPopup()
-    {
-        if (!popup.opened)
-        {
-            popup.open()
+    function openPopup() {
+        if (!popup.opened) {
+            popup.open();
         }
+    }
+    function reset() {
+        input.readOnly = false;
+        input.text = "";
     }
 }

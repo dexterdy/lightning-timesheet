@@ -3,8 +3,10 @@ import QtQuick.Controls
 
 ApplicationWindow {
     visible: true
-    width: 1200
-    height: 1000
+    maximumWidth: 700
+    maximumHeight: 700
+    minimumWidth: 700
+    minimumHeight: 700
     title: "Lightning Timesheet"
     FontLoader {
         id: iconFont
