@@ -7,8 +7,8 @@ from PySide6.QtCore import QObject, Slot, Property
 import globals
 from githubIssuesModel import GithubIssuesModel
 import json
-
 from enum import Enum
+from export import exportMD
 
 
 class ExportType(Enum):
@@ -24,6 +24,16 @@ except:
         storeFile.write('{"timeSheet": []}')
     with open("storedLogs.json", "r") as storeFile:
         timeSheet: list[dict[str, typing.Any]] = json.load(storeFile)["timeSheet"]
+
+
+exportMD(
+    timeSheet,
+    list(
+        globals.getGithubInstance()
+        .get_repo("dexterdy/lightning-pipelines")
+        .get_issues()
+    ),
+)
 
 
 class Backend(QObject):
@@ -124,7 +134,17 @@ class Backend(QObject):
 
     @Slot(ExportType)
     def export(self, type: ExportType):
-        pass
+        if type == ExportType.MD:
+            exportMD(
+                timeSheet,
+                list(
+                    globals.getGithubInstance()
+                    .get_repo("dexterdy/lightning-pipelines")
+                    .get_issues()
+                ),
+            )
+        elif type == ExportType.EXCEL:
+            pass
 
     @Property(str, constant=True)  # type: ignore
     def defaultYear(self):
