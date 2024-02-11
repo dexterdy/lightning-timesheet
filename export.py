@@ -51,7 +51,7 @@ def exportMD(logs: list[dict[str, typing.Any]], issues: list[Issue]):
         logs,
         issues,
         MarkdownTableWriter,
-        lambda ticket: f"[{ticket.title}]({ticket.url})",
+        lambda ticket: f"[{ticket.title}]({ticket.html_url})",
         "timeSheet.md",
     )
 
@@ -61,6 +61,6 @@ def exportExcel(logs: list[dict[str, typing.Any]], issues: list[Issue]):
         logs,
         issues,
         ExcelXlsxTableWriter,
-        lambda ticket: f'=HYPERLINK("{ticket.url}","{ticket.title}")',
+        lambda ticket: f'=HYPERLINK("{ticket.html_url}";"{ticket.title}")',
         "timeSheet.xlsx",
     )
