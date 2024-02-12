@@ -5,32 +5,19 @@ import QtQuick.Layouts
 import QtQml
 import "../icons/MaterialDesign.js" as MD
 
-Item {
+Popup {
     id: modalContainer
+    parent: Overlay.overlay
+    modal: true
     visible: false
+    width: 500
+    height: 620
+    anchors.centerIn: parent
     Rectangle {
         id: logModal
-        width: 500
-        height: 620
+        anchors.fill: parent
         radius: 8.0
-        anchors.centerIn: parent
         color: "#444444"
-
-        Icon {
-            id: exit
-            icon: MD.icons.close
-            anchors.right: parent.right
-        }
-        HoverHandler {
-            parent: exit
-            cursorShape: Qt.PointingHandCursor
-        }
-        TapHandler {
-            parent: exit
-            onTapped: {
-                modalContainer.visible = false;
-            }
-        }
 
         ColumnLayout {
             anchors.margins: 50
@@ -231,8 +218,8 @@ Item {
         cornerRadius: 8.0
         glowRadius: 15
     }
-    function open() {
-        modalContainer.visible = true;
+    function openModal() {
+        modalContainer.open();
         ticketInput.updateIssues();
         userStoryInput.updateIssues();
     }
@@ -258,5 +245,6 @@ Item {
         tillHour.text = "";
         tillMinute.text = "";
         description.text = "";
+        modalContainer.close();
     }
 }
