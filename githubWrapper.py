@@ -6,15 +6,6 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import urllib.parse
 from threading import Thread
 
-cfg = dotenv_values(".env")
-client_secret = cfg.get("CLIENT_SECRET")
-user_auth = cfg.get("USER_AUTH")
-ins_id = cfg.get("INS_ID")
-client_id = "Iv1.d6a13760097bc4c6"
-app_id = 820437
-install_url = "https://github.com/apps/lightning-timesheets/installations/new"
-g = None
-
 
 class AuthHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -53,15 +44,9 @@ def authenticate():
     set_key(".env", "INS_ID", ins_id)
 
 
-if user_auth == "" or user_auth is None:
-    authenticate()
-
-
 def getGithub():
     global g
     try:
-        if g is None:
-            g = Github(user_auth)
         g.get_repo("dexterdy/lightning-pipelines")  # just to test
     except:
         authenticate()
@@ -71,9 +56,35 @@ def getGithub():
 
 def getIssues() -> list[Issue]:
     g = getGithub()
-    try:
-        return list(g.get_repo("dexterdy/lightning-pipelines").get_issues())
-    except:
+    return list(g.get_repo("dexterdy/lightning-pipelines").get_issues())
+
+
+# has to be run once at the start of the program.
+# safetey guarantees and checks? Meh
+def ensureAuthAndGlobals():
+    global cfg
+    cfg = dotenv_values(".env")
+
+    global client_secret
+    client_secret = cfg.get("CLIENT_SECRET")
+
+    global user_auth
+    user_auth = cfg.get("USER_AUTH")
+
+    global ins_id
+    ins_id = cfg.get("INS_ID")
+
+    global client_id
+    client_id = "Iv1.d6a13760097bc4c6"
+
+    global app_id
+    app_id = 820437
+
+    global install_url
+    install_url = "https://github.com/apps/lightning-timesheets/installations/new"
+
+    if user_auth == "" or user_auth is None:
         authenticate()
-        g = Github(user_auth)
-        return list(g.get_repo("dexterdy/lightning-pipelines").get_issues())
+
+    global g
+    g = Github(user_auth)

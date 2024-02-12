@@ -7,8 +7,15 @@ from export import exportMD, exportExcel
 from copy import copy
 
 
-def loadJson():
-    timeSheet: list[dict[str, typing.Any]] = json.load(storeFile)["timeSheet"]
+def loadJson() -> list[dict[str, typing.Any]]:
+    try:
+        with open("storedLogs.json", "r") as storeFile:
+            timeSheet: list[dict[str, typing.Any]] = json.load(storeFile)["timeSheet"]
+    except:
+        with open("storedLogs.json", "w") as storeFile:
+            storeFile.write('{"timeSheet": []}')
+        with open("storedLogs.json", "r") as storeFile:
+            timeSheet: list[dict[str, typing.Any]] = json.load(storeFile)["timeSheet"]
 
     def convertDate(entry: dict[str, typing.Any]) -> dict[str, typing.Any]:
         entry["fromTime"] = datetime.fromisoformat(entry["fromTime"])
@@ -18,17 +25,7 @@ def loadJson():
     return list(map(convertDate, timeSheet))
 
 
-try:
-    with open("storedLogs.json", "r") as storeFile:
-        timeSheet: list[dict[str, typing.Any]] = loadJson()
-except:
-    with open("storedLogs.json", "w") as storeFile:
-        storeFile.write('{"timeSheet": []}')
-    with open("storedLogs.json", "r") as storeFile:
-        timeSheet: list[dict[str, typing.Any]] = loadJson()
-
-
-def storeJson():
+def storeJson(timeSheet: list[dict[str, typing.Any]]):
     def convertDate(entry: dict[str, typing.Any]) -> dict[str, str]:
         entry = copy(entry)
         entry["fromTime"] = entry["fromTime"].isoformat()
@@ -42,7 +39,7 @@ def storeJson():
 
 
 class Backend(QObject):
-    def __init__(self):
+    def __init__(self, timeSheet: list[dict[str, typing.Any]]):
         super().__init__()
         self.selectedTicket: str | int | None = None
         self.selectedUserStory: str | int | None = None
@@ -51,6 +48,7 @@ class Backend(QObject):
         self.tillTime: datetime | None = None
         self.description: str = ""
         self.atOffice = True
+        self.timeSheet = timeSheet
 
     @Slot(int)
     def selectTicket(self, number: int):
@@ -119,7 +117,7 @@ class Backend(QObject):
             return "All required fields must be set before submission."
         if self.tillTime <= self.fromTime:
             return "'Till' time must be later than 'From' time."
-        timeSheet.append(
+        self.timeSheet.append(
             {
                 "ticket": self.selectedTicket,
                 "userStory": self.selectedUserStory,
@@ -129,7 +127,7 @@ class Backend(QObject):
                 "atOffice": self.atOffice,
             }
         )
-        storeJson()
+        storeJson(self.timeSheet)
         self.reset()
         return ""
 
@@ -146,9 +144,9 @@ class Backend(QObject):
     @Slot(int)
     def export(self, type: int):
         if type == 1:
-            exportMD(timeSheet, getIssues())
+            exportMD(self.timeSheet, getIssues())
         elif type == 2:
-            exportExcel(timeSheet, getIssues())
+            exportExcel(self.timeSheet, getIssues())
 
     @Property(str, constant=True)  # type: ignore
     def defaultYear(self):
@@ -163,4 +161,13 @@ class Backend(QObject):
         return "%02d" % self.date.day
 
 
-backend = Backend()
+# I could implement some safety thing that makes sure only one backend exists, but meh.
+def createBackend():
+    global backend
+    backend = Backend(loadJson())
+
+
+# Same thing with checking for if backend actually has been created.
+def getBackend() -> Backend:
+    global backend
+    return backend
