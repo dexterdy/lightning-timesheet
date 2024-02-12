@@ -1,5 +1,5 @@
 from threading import Thread
-from typing import Any, Dict
+from typing import Any
 from PySide6.QtCore import (
     QAbstractListModel,
     QModelIndex,
@@ -28,7 +28,7 @@ class GithubIssuesModel(QAbstractListModel):
             if field:
                 return getattr(issue, field.decode())
 
-    def roleNames(self) -> Dict[int, bytes]:
+    def roleNames(self) -> dict[int, bytes]:
         d = {
             0: "title".encode(),
             1: "number".encode(),

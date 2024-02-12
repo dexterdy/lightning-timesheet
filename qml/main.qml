@@ -2,6 +2,8 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQml
+import WeekDaysModel
+import LogsModel
 
 ApplicationWindow {
     id: window
@@ -47,6 +49,17 @@ ApplicationWindow {
         Item {
             ScrollView {
                 ListView {
+                    model: WeekDaysModel {
+                        id: days
+                    }
+                    delegate: ListView {
+                        model: LogsModel {
+                            logs: dayLogs
+                        }
+                        delegate: Text {
+                            text: "hello"
+                        }
+                    }
                 }
             }
         }
