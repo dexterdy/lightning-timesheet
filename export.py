@@ -15,7 +15,7 @@ def _exportGeneric(
         ticket = issues[x["ticket"] - 1]
         ticketStr = linkFormatter(ticket)
 
-        if "userStory" in x:
+        if "userStory" in x and x["userStory"] is not None:
             userStory = issues[x["userStory"] - 1]
             userStoryStr = linkFormatter(userStory)
         else:
@@ -25,7 +25,7 @@ def _exportGeneric(
         tillTime = x["tillTime"]
         duration = datetime.fromisoformat(tillTime) - datetime.fromisoformat(fromTime)
 
-        if "description" in x:
+        if "description" in x and x["description"] is not None:
             description = x["description"]
         else:
             description = ""
