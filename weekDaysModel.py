@@ -1,4 +1,4 @@
-from threading import Thread
+from re import T
 from typing import Any, Dict
 from PySide6.QtCore import (
     QAbstractListModel,
@@ -6,9 +6,7 @@ from PySide6.QtCore import (
     Slot,
 )
 from PySide6.QtQml import QmlElement
-from thefuzz import process, fuzz
-from githubWrapper import getIssues
-from github.Issue import Issue
+from datetime import date, datetime, timedelta
 
 QML_IMPORT_NAME = "WeekDaysModel"
 QML_IMPORT_MAJOR_VERSION = 1
@@ -18,7 +16,10 @@ QML_IMPORT_MAJOR_VERSION = 1
 class WeekDaysModel(QAbstractListModel):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
-        self.days = []
+        today = date.today()
+        weekday = today.isoweekday()
+        start = today - timedelta(days=weekday)
+        self.days = [start + timedelta(days=d) for d in range(7)]
 
     def data(self, index: QModelIndex, role: int = 0) -> Any:
         if 0 <= index.row() < self.rowCount():

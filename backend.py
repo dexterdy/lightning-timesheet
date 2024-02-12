@@ -4,15 +4,41 @@ from PySide6.QtCore import QObject, Slot, Property
 from githubWrapper import getIssues
 import json
 from export import exportMD, exportExcel
+from copy import copy
+
+
+def loadJson():
+    timeSheet: list[dict[str, typing.Any]] = json.load(storeFile)["timeSheet"]
+
+    def convertDate(entry: dict[str, typing.Any]) -> dict[str, typing.Any]:
+        entry["fromTime"] = datetime.fromisoformat(entry["fromTime"])
+        entry["tillTime"] = datetime.fromisoformat(entry["tillTime"])
+        return entry
+
+    return list(map(convertDate, timeSheet))
+
 
 try:
     with open("storedLogs.json", "r") as storeFile:
-        timeSheet: list[dict[str, typing.Any]] = json.load(storeFile)["timeSheet"]
+        timeSheet: list[dict[str, typing.Any]] = loadJson()
 except:
     with open("storedLogs.json", "w") as storeFile:
         storeFile.write('{"timeSheet": []}')
     with open("storedLogs.json", "r") as storeFile:
-        timeSheet: list[dict[str, typing.Any]] = json.load(storeFile)["timeSheet"]
+        timeSheet: list[dict[str, typing.Any]] = loadJson()
+
+
+def storeJson():
+    def convertDate(entry: dict[str, typing.Any]) -> dict[str, str]:
+        entry = copy(entry)
+        entry["fromTime"] = entry["fromTime"].isoformat()
+        entry["tillTime"] = entry["tillTime"].isoformat()
+        return entry
+
+    timeSheetStr = list(map(convertDate, timeSheet))
+
+    with open("storedLogs.json", "w") as storeFile:
+        json.dump({"timeSheet": timeSheetStr}, storeFile)
 
 
 class Backend(QObject):
@@ -97,14 +123,13 @@ class Backend(QObject):
             {
                 "ticket": self.selectedTicket,
                 "userStory": self.selectedUserStory,
-                "fromTime": self.fromTime.isoformat(),
-                "tillTime": self.tillTime.isoformat(),
+                "fromTime": self.fromTime,
+                "tillTime": self.tillTime,
                 "description": self.description,
                 "atOffice": self.atOffice,
             }
         )
-        with open("storedLogs.json", "w") as storeFile:
-            json.dump({"timeSheet": timeSheet}, storeFile)
+        storeJson()
         self.reset()
         return ""
 

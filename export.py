@@ -23,7 +23,7 @@ def _exportGeneric(
 
         fromTime = x["fromTime"]
         tillTime = x["tillTime"]
-        duration = datetime.fromisoformat(tillTime) - datetime.fromisoformat(fromTime)
+        duration = tillTime - fromTime
 
         if "description" in x and x["description"] is not None:
             description = x["description"]
