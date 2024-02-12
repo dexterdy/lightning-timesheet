@@ -2,44 +2,34 @@ import typing
 from pytablewriter import AbstractTableWriter, MarkdownTableWriter, ExcelXlsxTableWriter
 from datetime import datetime
 from github.Issue import Issue
+from logType import Log
 
 
 def _exportGeneric(
-    logs: list[dict[str, typing.Any]],
+    logs: list[Log],
     issues: list[Issue],
     writer: type[AbstractTableWriter],
     linkFormatter: typing.Callable[[Issue], str],
     filename: str,
 ):
-    def mapLambda(x: dict[str, typing.Any]) -> list[typing.Any]:
-        ticket = issues[x["ticket"] - 1]
+    def mapLambda(x: Log) -> list[typing.Any]:
+        ticket = issues[x.ticket - 1]
         ticketStr = linkFormatter(ticket)
 
-        if "userStory" in x and x["userStory"] is not None:
-            userStory = issues[x["userStory"] - 1]
+        if x.userStory is not None:
+            userStory = issues[x.userStory - 1]
             userStoryStr = linkFormatter(userStory)
         else:
             userStoryStr = ""
 
-        fromTime = x["fromTime"]
-        tillTime = x["tillTime"]
-        duration = tillTime - fromTime
-
-        if "description" in x and x["description"] is not None:
-            description = x["description"]
-        else:
-            description = ""
-
-        atOffice = x["atOffice"]
-
         return [
             ticketStr,
             userStoryStr,
-            fromTime,
-            tillTime,
-            description,
-            duration,
-            atOffice,
+            x.fromTime,
+            x.tillTime,
+            x.description,
+            x.tillTime - x.fromTime,
+            x.atOffice,
         ]
 
     matrix = list(map(mapLambda, logs))
@@ -60,7 +50,7 @@ def _exportGeneric(
     writerInstance.dump(filename, close_after_write=True)
 
 
-def exportMD(logs: list[dict[str, typing.Any]], issues: list[Issue]):
+def exportMD(logs: list[Log], issues: list[Issue]):
     _exportGeneric(
         logs,
         issues,
@@ -70,7 +60,7 @@ def exportMD(logs: list[dict[str, typing.Any]], issues: list[Issue]):
     )
 
 
-def exportExcel(logs: list[dict[str, typing.Any]], issues: list[Issue]):
+def exportExcel(logs: list[Log], issues: list[Issue]):
     _exportGeneric(
         logs,
         issues,

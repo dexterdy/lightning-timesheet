@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from re import T
 from typing import Any, Dict
 from PySide6.QtCore import (
@@ -7,9 +8,17 @@ from PySide6.QtCore import (
 )
 from PySide6.QtQml import QmlElement
 from datetime import date, datetime, timedelta
+from backend import getBackend
+from logType import Log
 
 QML_IMPORT_NAME = "WeekDaysModel"
 QML_IMPORT_MAJOR_VERSION = 1
+
+
+@dataclass
+class day:
+    day: date
+    logs: list[Log]
 
 
 @QmlElement
@@ -19,7 +28,9 @@ class WeekDaysModel(QAbstractListModel):
         today = date.today()
         weekday = today.isoweekday()
         start = today - timedelta(days=weekday)
-        self.days = [start + timedelta(days=d) for d in range(7)]
+        self.backend = getBackend()
+        days = [start + timedelta(days=d) for d in range(7)]
+        self.days = []
 
     def data(self, index: QModelIndex, role: int = 0) -> Any:
         if 0 <= index.row() < self.rowCount():

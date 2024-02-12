@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from datetime import datetime, date
 import typing
 from PySide6.QtCore import QObject, Slot, Property
@@ -6,8 +7,10 @@ import json
 from export import exportMD, exportExcel
 from copy import copy
 
+from logType import Log
 
-def loadJson() -> list[dict[str, typing.Any]]:
+
+def loadJson() -> list[Log]:
     try:
         with open("storedLogs.json", "r") as storeFile:
             timeSheet: list[dict[str, typing.Any]] = json.load(storeFile)["timeSheet"]
@@ -17,19 +20,29 @@ def loadJson() -> list[dict[str, typing.Any]]:
         with open("storedLogs.json", "r") as storeFile:
             timeSheet: list[dict[str, typing.Any]] = json.load(storeFile)["timeSheet"]
 
-    def convertDate(entry: dict[str, typing.Any]) -> dict[str, typing.Any]:
-        entry["fromTime"] = datetime.fromisoformat(entry["fromTime"])
-        entry["tillTime"] = datetime.fromisoformat(entry["tillTime"])
-        return entry
+    def convertDate(entry: dict[str, str]) -> Log:
+        return Log(
+            ticket=int(entry["ticket"]),
+            userStory=int(entry["userStory"]) if entry["userStory"] else None,
+            description=entry["description"],
+            fromTime=datetime.fromisoformat(entry["fromTime"]),
+            tillTime=datetime.fromisoformat(entry["tillTime"]),
+            atOffice=bool(entry["atOffice"]),
+        )
 
     return list(map(convertDate, timeSheet))
 
 
-def storeJson(timeSheet: list[dict[str, typing.Any]]):
-    def convertDate(entry: dict[str, typing.Any]) -> dict[str, str]:
-        entry = copy(entry)
-        entry["fromTime"] = entry["fromTime"].isoformat()
-        entry["tillTime"] = entry["tillTime"].isoformat()
+def storeJson(timeSheet: list[Log]):
+    def convertDate(log: Log) -> dict[str, str]:
+        entry = {
+            "ticket": log.ticket,
+            "userStory": log.userStory,
+            "fromTime": log.fromTime.isoformat(),
+            "tillTime": log.tillTime.isoformat(),
+            "description": log.description,
+            "atOffice": log.atOffice,
+        }
         return entry
 
     timeSheetStr = list(map(convertDate, timeSheet))
@@ -39,10 +52,10 @@ def storeJson(timeSheet: list[dict[str, typing.Any]]):
 
 
 class Backend(QObject):
-    def __init__(self, timeSheet: list[dict[str, typing.Any]]):
+    def __init__(self, timeSheet: list[Log]):
         super().__init__()
-        self.selectedTicket: str | int | None = None
-        self.selectedUserStory: str | int | None = None
+        self.selectedTicket: int | None = None
+        self.selectedUserStory: int | None = None
         self.date: date = date.today()
         self.fromTime: datetime | None = None
         self.tillTime: datetime | None = None
@@ -57,14 +70,6 @@ class Backend(QObject):
     @Slot(int)
     def selectUserStory(self, number: int):
         self.selectedUserStory = number
-
-    @Slot(str)
-    def setTicketDescription(self, description: str):
-        self.selectedTicket = description
-
-    @Slot(str)
-    def setUserStoryDescription(self, description: str):
-        self.selectedUserStory = description
 
     @Slot(int, int, int, result=str)
     def setDate(self, yyyy, mm, dd):
@@ -118,14 +123,14 @@ class Backend(QObject):
         if self.tillTime <= self.fromTime:
             return "'Till' time must be later than 'From' time."
         self.timeSheet.append(
-            {
-                "ticket": self.selectedTicket,
-                "userStory": self.selectedUserStory,
-                "fromTime": self.fromTime,
-                "tillTime": self.tillTime,
-                "description": self.description,
-                "atOffice": self.atOffice,
-            }
+            Log(
+                ticket=self.selectedTicket,
+                userStory=self.selectedUserStory,
+                fromTime=self.fromTime,
+                tillTime=self.tillTime,
+                description=self.description,
+                atOffice=self.atOffice,
+            )
         )
         storeJson(self.timeSheet)
         self.reset()
