@@ -12,7 +12,7 @@ Item {
     Rectangle {
         id: logModal
         width: 500
-        height: 600
+        height: 620
         radius: 8.0
         anchors.centerIn: parent
         color: "#444444"
@@ -158,6 +158,18 @@ Item {
                             }
                         }
                     }
+                    Row {
+                        Layout.preferredWidth: parent.width
+                        Layout.preferredHeight: atOffice.height
+                        CheckBox {
+                            id: atOffice
+                            checkState: Qt.Checked
+                        }
+                        Label {
+                            text: "At the office"
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+                    }
                     Label {
                         Layout.bottomMargin: 5
                         text: "Description (optional):"
@@ -195,6 +207,7 @@ Item {
                         if (err === "")
                             err = backend.setTillTime(Number(tillHour.text), Number(tillMinute.text));
                         backend.setDescription(description.text);
+                        backend.setAtOffice(atOffice.checkState === Qt.Checked);
                         if (err === "")
                             err = backend.submit();
                         error.text = err;

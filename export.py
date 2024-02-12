@@ -30,6 +30,8 @@ def _exportGeneric(
         else:
             description = ""
 
+        atOffice = x["atOffice"]
+
         return [
             ticketStr,
             userStoryStr,
@@ -37,13 +39,22 @@ def _exportGeneric(
             tillTime,
             description,
             duration,
+            atOffice,
         ]
 
     matrix = list(map(mapLambda, logs))
     matrix.sort(key=lambda x: datetime.fromisoformat(str(x[2])))
     writerInstance = writer(
         table_name="time sheet",
-        headers=["ticket", "user story", "from", "till", "description", "duration"],
+        headers=[
+            "ticket",
+            "user story",
+            "from",
+            "till",
+            "description",
+            "duration",
+            "at the office",
+        ],
         value_matrix=matrix,
     )
     writerInstance.dump(filename, close_after_write=True)

@@ -31,6 +31,7 @@ class Backend(QObject):
         self.fromTime: datetime | None = None
         self.tillTime: datetime | None = None
         self.description: str = ""
+        self.atOffice = True
 
     @Slot(int)
     def selectTicket(self, number: int):
@@ -84,6 +85,10 @@ class Backend(QObject):
     def setDescription(self, description: str):
         self.description = description
 
+    @Slot(bool)
+    def setAtOffice(self, atOffice: bool):
+        self.atOffice = atOffice
+
     @Slot(result=str)
     def submit(self):
         if (
@@ -102,6 +107,7 @@ class Backend(QObject):
                 "fromTime": self.fromTime.isoformat(),
                 "tillTime": self.tillTime.isoformat(),
                 "description": self.description,
+                "atOffice": self.atOffice,
             }
         )
         with open("storedLogs.json", "w") as storeFile:
@@ -117,6 +123,7 @@ class Backend(QObject):
         self.fromTime = None
         self.tillTime = None
         self.description = ""
+        self.atOffice = False
 
     @Slot(int)
     def export(self, type: int):
