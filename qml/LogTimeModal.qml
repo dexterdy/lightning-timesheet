@@ -7,7 +7,6 @@ import "../icons/MaterialDesign.js" as MD
 
 Item {
     id: modalContainer
-    anchors.fill: parent
     visible: false
     Rectangle {
         id: logModal

@@ -18,8 +18,8 @@ QML_IMPORT_MAJOR_VERSION = 1
 class GithubIssuesModel(QAbstractListModel):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
-        self.issues = getIssues()
-        self.filteredIssues = self.issues[:7]
+        self.issues = []
+        self.filteredIssues = []
 
     def data(self, index: QModelIndex, role: int = 0) -> Any:
         if 0 <= index.row() < self.rowCount():
