@@ -145,6 +145,8 @@ class Backend(QObject):
 
     @Slot(int)
     def export(self, type: int):
+        if len(self.timeSheet) == 0 or not self.timeSheet:
+            return
         if type == 1:
             exportMD(self.timeSheet, getIssues())
         elif type == 2:
