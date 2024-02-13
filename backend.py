@@ -1,12 +1,9 @@
-from dataclasses import dataclass
 from datetime import datetime, date
 import typing
 from PySide6.QtCore import QObject, Slot, Property
 from githubWrapper import getIssues
 import json
 from export import exportMD, exportExcel
-from copy import copy
-
 from logType import Log
 
 

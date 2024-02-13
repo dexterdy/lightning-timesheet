@@ -30,7 +30,6 @@ Item {
         x: 0
         width: parent.width
         height: 200
-        modal: true
         ScrollView {
             anchors.fill: parent
             ListView {

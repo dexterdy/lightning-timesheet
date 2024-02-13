@@ -9,6 +9,7 @@ from PySide6.QtCore import (
 )
 from PySide6.QtQml import QmlElement
 from datetime import date, datetime, timedelta
+from QtObjectWrapper import Wrapper
 from backend import getBackend
 from logType import Log
 
@@ -21,13 +22,20 @@ class WeekDaysModel(QAbstractListModel):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         today = date.today()
+        week = today.isocalendar().week
         weekday = today.isoweekday()
         self.startDay = today - timedelta(days=weekday)
         self.backend = getBackend()
         self.days: list[list[Log]] = [[] for _ in range(7)]
         for log in self.backend.timeSheet:
             for day in range(7):
-                if log.fromTime.weekday == day or log.tillTime.weekday == day:
+                if (
+                    log.fromTime.weekday() == day
+                    and log.fromTime.isocalendar().week == week
+                ) or (
+                    log.tillTime.weekday() == day
+                    and log.tillTime.isocalendar().week == week
+                ):
                     self.days[day].append(log)
 
     def data(self, index: QModelIndex, role: int = 0) -> Any:
@@ -41,7 +49,7 @@ class WeekDaysModel(QAbstractListModel):
                 elif field == "dateStr":
                     return day.strftime("%d %b")
                 elif field == "dayLogs":
-                    return self.days[index.row()]
+                    return Wrapper(self.days[index.row()])
 
     def roleNames(self) -> dict[int, bytes]:
         d = {
@@ -79,12 +87,12 @@ class LogsModel(QAbstractListModel):
         return d
 
     @Property(QObject, notify=logsChanged)  # type: ignore
-    def logs(self) -> list[Log]:  # type: ignore
-        return self._log
+    def logs(self) -> QObject:  # type: ignore
+        return Wrapper(self._log)
 
     @logs.setter
-    def logs(self, logs: list[Log]):
-        self._log = logs
+    def logs(self, logs: Wrapper):
+        self._log = logs.obj
 
     def rowCount(self, index: QModelIndex | None = None) -> int:
         return len(self._log)

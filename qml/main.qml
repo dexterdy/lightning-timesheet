@@ -46,19 +46,20 @@ ApplicationWindow {
                 onClicked: backend.export(2)
             }
         }
-        Item {
-            ScrollView {
-                ListView {
-                    model: WeekDaysModel {
-                        id: days
+        ScrollView {
+            Layout.preferredHeight: 100
+            Layout.preferredWidth: 100
+            ListView {
+                model: WeekDaysModel {
+                    id: days
+                }
+                delegate: ListView {
+                    model: LogsModel {
+                        logs: dayLogs
                     }
-                    delegate: ListView {
-                        model: LogsModel {
-                            logs: dayLogs
-                        }
-                        delegate: Text {
-                            text: "hello"
-                        }
+                    delegate: Text {
+                        text: "hello"
+                        color: "white"
                     }
                 }
             }
