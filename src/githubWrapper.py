@@ -56,7 +56,7 @@ def getGithub():
 
 def getIssues() -> list[Issue]:
     g = getGithub()
-    return list(g.get_repo("dexterdy/lightning-pipelines").get_issues())
+    return list(g.get_repo("dexterdy/lightning-pipelines").get_issues(state="all"))
 
 
 # has to be run once at the start of the program.
