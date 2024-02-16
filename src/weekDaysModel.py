@@ -92,7 +92,14 @@ class LogsModel(QAbstractListModel):
 
     @logs.setter
     def logs(self, logs: Wrapper):
+        if len(self._log) > 0:
+            self.beginRemoveRows(QModelIndex(), 0, len(self._log))
+            self._log = []
+            self.endRemoveRows()
+        self.beginInsertRows(QModelIndex(), 0, len(logs.obj))
         self._log = logs.obj
+        self.endInsertRows()
 
     def rowCount(self, index: QModelIndex | None = None) -> int:
+        print(len(self._log))
         return len(self._log)

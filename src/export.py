@@ -13,11 +13,17 @@ def _exportGeneric(
     filename: str,
 ):
     def mapLambda(x: Log) -> list[typing.Any]:
-        ticket = issues[x.ticket - 1]
+        def getTicket(id: int):
+            for i in issues:
+                if i.number == id:
+                    return i
+            raise Exception(f"Ticket {id} not found")
+
+        ticket = getTicket(x.ticket)
         ticketStr = linkFormatter(ticket)
 
         if x.userStory is not None:
-            userStory = issues[x.userStory - 1]
+            userStory = getTicket(x.userStory)
             userStoryStr = linkFormatter(userStory)
         else:
             userStoryStr = ""
