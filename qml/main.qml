@@ -2,8 +2,6 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQml
-import WeekDaysModel
-import LogsModel
 
 ApplicationWindow {
     id: window
@@ -52,23 +50,10 @@ ApplicationWindow {
             id: scroller
             Layout.fillWidth: true
             Layout.fillHeight: true
-            ListView {
-                orientation: ListView.Horizontal
-                model: WeekDaysModel {
-                    id: days
-                }
-                delegate: ListView {
-                    implicitWidth: scroller.width / 7
-                    implicitHeight: scroller.height
-                    model: LogsModel {
-                        logs: dayLogs
-                    }
-                    delegate: Text {
-                        id: t
-                        text: "hello"
-                        color: "white"
-                    }
-                }
+            contentHeight: 2400
+            contentWidth: parent.width
+            clip: true
+            WeekView {
             }
         }
     }

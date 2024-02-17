@@ -80,10 +80,14 @@ class LogsModel(QAbstractListModel):
             issue = self._log[index.row()]
             field = self.roleNames().get(role)
             if field:
-                return getattr(issue, field.decode())
+                date: datetime = getattr(issue, field.decode())
+                return (date.time().hour + date.time().minute / 60.0) / 24
 
     def roleNames(self) -> dict[int, bytes]:
-        d = {}
+        d = {
+            0: "fromTime".encode(),
+            1: "tillTime".encode(),
+        }
         return d
 
     @Property(QObject, notify=logsChanged)  # type: ignore
