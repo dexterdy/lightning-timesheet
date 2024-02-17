@@ -21,8 +21,10 @@ ApplicationWindow {
         id: modal
     }
     ColumnLayout {
+        id: topColumn
         anchors.fill: parent
         Item {
+            id: topRow
             Layout.fillWidth: true
             Layout.preferredHeight: markdown.height
             Layout.margins: 10
@@ -47,17 +49,22 @@ ApplicationWindow {
             }
         }
         ScrollView {
-            Layout.preferredHeight: 100
-            Layout.preferredWidth: 100
+            id: scroller
+            Layout.fillWidth: true
+            Layout.fillHeight: true
             ListView {
+                orientation: ListView.Horizontal
                 model: WeekDaysModel {
                     id: days
                 }
                 delegate: ListView {
+                    implicitWidth: scroller.width / 7
+                    implicitHeight: scroller.height
                     model: LogsModel {
                         logs: dayLogs
                     }
                     delegate: Text {
+                        id: t
                         text: "hello"
                         color: "white"
                     }

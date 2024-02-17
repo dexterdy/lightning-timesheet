@@ -96,10 +96,11 @@ class LogsModel(QAbstractListModel):
             self.beginRemoveRows(QModelIndex(), 0, len(self._log))
             self._log = []
             self.endRemoveRows()
+            self.logsChanged.emit()
         self.beginInsertRows(QModelIndex(), 0, len(logs.obj))
         self._log = logs.obj
         self.endInsertRows()
+        self.logsChanged.emit()
 
     def rowCount(self, index: QModelIndex | None = None) -> int:
-        print(len(self._log))
         return len(self._log)
