@@ -11,6 +11,7 @@ from PySide6.QtQml import QmlElement
 from datetime import date, datetime, timedelta
 from QtObjectWrapper import Wrapper
 from backend import getBackend
+from getIssueFromInt import getTicket
 from logType import Log
 
 QML_IMPORT_NAME = "WeekDaysModel"
@@ -77,17 +78,19 @@ class LogsModel(QAbstractListModel):
 
     def data(self, index: QModelIndex, role: int = 0) -> Any:
         if 0 <= index.row() < self.rowCount():
-            issue = self._log[index.row()]
+            log: Log = self._log[index.row()]
             field = self.roleNames().get(role)
             if field:
-                date: datetime = getattr(issue, field.decode())
-                return (date.time().hour + date.time().minute / 60.0) / 24
+                field = field.decode()
+                if field == "fromTime" or field == "tillTime":
+                    date: datetime = getattr(log, field)
+                    return (date.time().hour + date.time().minute / 60.0) / 24
+                elif field == "title":
+                    issue = getTicket(log.ticket)
+                    return getattr(issue, field)
 
     def roleNames(self) -> dict[int, bytes]:
-        d = {
-            0: "fromTime".encode(),
-            1: "tillTime".encode(),
-        }
+        d = {0: "fromTime".encode(), 1: "tillTime".encode(), 2: "title".encode()}
         return d
 
     @Property(QObject, notify=logsChanged)  # type: ignore

@@ -54,9 +54,16 @@ def getGithub():
     return g
 
 
-def getIssues() -> list[Issue]:
+def syncIssues() -> list[Issue]:
     g = getGithub()
-    return list(g.get_repo("dexterdy/lightning-pipelines").get_issues(state="all"))
+    global issues
+    issues = list(g.get_repo("dexterdy/lightning-pipelines").get_issues(state="all"))
+    return issues
+
+
+def getIssues() -> list[Issue]:
+    global issues
+    return issues
 
 
 # has to be run once at the start of the program.
@@ -88,3 +95,6 @@ def ensureAuthAndGlobals():
 
     global g
     g = Github(user_auth)
+
+    global issues
+    issues = syncIssues()

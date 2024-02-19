@@ -1,7 +1,7 @@
 from datetime import datetime, date
 import typing
 from PySide6.QtCore import QObject, Slot, Property
-from githubWrapper import getIssues
+from githubWrapper import getIssues, syncIssues
 import json
 from export import exportMD, exportExcel
 from logType import Log

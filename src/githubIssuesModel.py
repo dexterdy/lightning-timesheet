@@ -7,7 +7,7 @@ from PySide6.QtCore import (
 )
 from PySide6.QtQml import QmlElement
 from thefuzz import process, fuzz
-from githubWrapper import getIssues
+from githubWrapper import syncIssues
 from github.Issue import Issue
 
 QML_IMPORT_NAME = "GithubIssuesModel"
@@ -62,7 +62,7 @@ class GithubIssuesModel(QAbstractListModel):
     @Slot()
     def updateIssues(self):
         def internal():
-            self.issues = getIssues()
+            self.issues = syncIssues()
             self.beginRemoveRows(QModelIndex(), 0, 6)
             self.filteredIssues = []
             self.endRemoveRows()
