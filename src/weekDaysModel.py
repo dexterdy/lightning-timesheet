@@ -24,9 +24,10 @@ class WeekDaysModel(QAbstractListModel):
         super().__init__(parent=parent)
         today = date.today()
         weekday = today.isoweekday()
-        self.startDay = today - timedelta(days=weekday)
+        self.startDay = today - timedelta(days=weekday - 1)
         self.backend = getBackend()
         self.days: list[list[Log]] = [[] for _ in range(7)]
+        self.updateDays()
 
     @Slot(type(None))
     def updateDays(self):
@@ -34,15 +35,13 @@ class WeekDaysModel(QAbstractListModel):
         week = self.startDay.isocalendar().week
         self.days = [[] for _ in range(7)]
         for log in self.backend.timeSheet:
-            for day in range(7):
-                if (
-                    log.fromTime.weekday() == day
-                    and log.fromTime.isocalendar().week == week
-                ) or (
-                    log.tillTime.weekday() == day
-                    and log.tillTime.isocalendar().week == week
-                ):
-                    self.days[day].append(log)
+            if log.fromTime.isocalendar().week == week:
+                self.days[log.fromTime.isocalendar().weekday - 1].append(log)
+            if (
+                log.tillTime.isocalendar().week == week
+                and log.tillTime.date() != log.fromTime.date()
+            ):
+                self.days[log.tillTime.isocalendar().weekday - 1].append(log)
         self.endResetModel()
 
     @Slot()
