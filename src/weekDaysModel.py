@@ -27,14 +27,15 @@ class WeekDaysModel(QAbstractListModel):
         self.startDay = today - timedelta(days=weekday - 1)
         self.backend = getBackend()
         self.days: list[list[Log]] = [[] for _ in range(7)]
-        self.updateDays()
+        self.updateDays(self.backend.timeSheet)
+        self.backend.timesheetChanged.connect(self.updateDays)
 
-    @Slot(type(None))
-    def updateDays(self):
+    @Slot()
+    def updateDays(self, timeSheet: Wrapper[list[Log]]):
         self.beginResetModel()
         week = self.startDay.isocalendar().week
         self.days = [[] for _ in range(7)]
-        for log in self.backend.timeSheet:
+        for log in timeSheet.obj:
             if log.fromTime.isocalendar().week == week:
                 self.days[log.fromTime.isocalendar().weekday - 1].append(log)
             if (
@@ -89,11 +90,11 @@ class LogsModel(QAbstractListModel):
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
-        self._log = []
+        self._log: list[Log] = []
 
     def data(self, index: QModelIndex, role: int = 0) -> Any:
         if 0 <= index.row() < self.rowCount():
-            log: Log = self._log[index.row()]
+            log = self._log[index.row()]
             field = self.roleNames().get(role)
             if field:
                 field = field.decode()
@@ -108,16 +109,16 @@ class LogsModel(QAbstractListModel):
         d = {0: "fromTime".encode(), 1: "tillTime".encode(), 2: "title".encode()}
         return d
 
-    @Property(QObject, notify=logsChanged)  # type: ignore
-    def logs(self) -> QObject:  # type: ignore
+    def get_logs(self) -> QObject:
         return Wrapper(self._log)
 
-    @logs.setter
-    def logs(self, logs: Wrapper):
+    def set_logs(self, logs: Wrapper[list[Log]]):
         self.beginResetModel()
         self._log = logs.obj
         self.logsChanged.emit()
         self.endResetModel()
+
+    logs = Property(QObject, get_logs, set_logs, notify=logsChanged)  # type: ignore
 
     def rowCount(self, index: QModelIndex | None = None) -> int:
         return len(self._log)

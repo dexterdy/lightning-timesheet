@@ -1,6 +1,7 @@
 from datetime import datetime, date
 import typing
-from PySide6.QtCore import QObject, Slot, Property
+from PySide6.QtCore import QObject, Slot, Property, Signal
+from QtObjectWrapper import Wrapper
 from githubWrapper import getIssues, syncIssues
 import json
 from export import exportMD, exportExcel
@@ -58,7 +59,7 @@ class Backend(QObject):
         self.tillTime: datetime | None = None
         self.description: str = ""
         self.atOffice = True
-        self.timeSheet = timeSheet
+        self._timeSheet = timeSheet
 
     @Slot(int)
     def selectTicket(self, number: int):
@@ -119,7 +120,7 @@ class Backend(QObject):
             return "All required fields must be set before submission."
         if self.tillTime <= self.fromTime:
             return "'Till' time must be later than 'From' time."
-        self.timeSheet.append(
+        self._timeSheet.append(
             Log(
                 ticket=self.selectedTicket,
                 userStory=self.selectedUserStory,
@@ -129,7 +130,8 @@ class Backend(QObject):
                 atOffice=self.atOffice,
             )
         )
-        storeJson(self.timeSheet)
+        storeJson(self._timeSheet)
+        self.timesheetChanged.emit(self.timeSheet)
         self.reset()
         return ""
 
@@ -145,12 +147,12 @@ class Backend(QObject):
 
     @Slot(int)
     def export(self, type: int):
-        if len(self.timeSheet) == 0 or not self.timeSheet:
+        if len(self._timeSheet) == 0 or not self._timeSheet:
             return
         if type == 1:
-            exportMD(self.timeSheet, getIssues())
+            exportMD(self._timeSheet, getIssues())
         elif type == 2:
-            exportExcel(self.timeSheet, getIssues())
+            exportExcel(self._timeSheet, getIssues())
 
     @Property(str, constant=True)  # type: ignore
     def defaultYear(self):
@@ -163,6 +165,12 @@ class Backend(QObject):
     @Property(str, constant=True)  # type: ignore
     def defaultDay(self):
         return "%02d" % self.date.day
+
+    timesheetChanged = Signal(QObject)
+
+    @Property(QObject, notify=timesheetChanged)  # type: ignore
+    def timeSheet(self) -> QObject:
+        return Wrapper(self._timeSheet)
 
 
 # I could implement some safety thing that makes sure only one backend exists, but meh.
