@@ -23,11 +23,16 @@ class WeekDaysModel(QAbstractListModel):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         today = date.today()
-        week = today.isocalendar().week
         weekday = today.isoweekday()
         self.startDay = today - timedelta(days=weekday)
         self.backend = getBackend()
         self.days: list[list[Log]] = [[] for _ in range(7)]
+
+    @Slot(type(None))
+    def updateDays(self):
+        self.beginResetModel()
+        week = self.startDay.isocalendar().week
+        self.days = [[] for _ in range(7)]
         for log in self.backend.timeSheet:
             for day in range(7):
                 if (
@@ -38,6 +43,17 @@ class WeekDaysModel(QAbstractListModel):
                     and log.tillTime.isocalendar().week == week
                 ):
                     self.days[day].append(log)
+        self.endResetModel()
+
+    @Slot()
+    def weekForward(self):
+        self.startDay = self.startDay + timedelta(days=7)
+        self.updateDays()
+
+    @Slot()
+    def weekBackward(self):
+        self.startDay = self.startDay - timedelta(days=7)
+        self.updateDays()
 
     def data(self, index: QModelIndex, role: int = 0) -> Any:
         if 0 <= index.row() < self.rowCount():
@@ -99,15 +115,10 @@ class LogsModel(QAbstractListModel):
 
     @logs.setter
     def logs(self, logs: Wrapper):
-        if len(self._log) > 0:
-            self.beginRemoveRows(QModelIndex(), 0, len(self._log))
-            self._log = []
-            self.endRemoveRows()
-            self.logsChanged.emit()
-        self.beginInsertRows(QModelIndex(), 0, len(logs.obj))
+        self.beginResetModel()
         self._log = logs.obj
-        self.endInsertRows()
         self.logsChanged.emit()
+        self.endResetModel()
 
     def rowCount(self, index: QModelIndex | None = None) -> int:
         return len(self._log)

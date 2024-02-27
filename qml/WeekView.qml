@@ -44,4 +44,10 @@ Row {
             }
         }
     }
+    function weekForward() {
+        days.weekForward();
+    }
+    function weekBackward() {
+        days.weekBackward();
+    }
 }

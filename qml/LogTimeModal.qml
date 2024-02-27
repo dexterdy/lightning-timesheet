@@ -17,7 +17,7 @@ Popup {
         id: logModal
         anchors.fill: parent
         radius: 8.0
-        color: "#444444"
+        color: systemPalette.light
 
         ColumnLayout {
             anchors.margins: 50
@@ -212,7 +212,7 @@ Popup {
         }
     }
     RectangularGlow {
-        color: "#353535"
+        color: "#151515"
         anchors.fill: logModal
         z: -1
         cornerRadius: 8.0

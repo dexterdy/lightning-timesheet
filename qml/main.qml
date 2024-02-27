@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQml
+import "../icons/MaterialDesign.js" as MD
 
 ApplicationWindow {
     id: window
@@ -14,6 +15,9 @@ ApplicationWindow {
     FontLoader {
         id: iconFont
         source: "../icons/MaterialIcons-Regular.ttf"
+    }
+    SystemPalette {
+        id: systemPalette
     }
     LogTimeModal {
         id: modal
@@ -28,9 +32,42 @@ ApplicationWindow {
             Layout.margins: 10
             Layout.alignment: Qt.AlignTop
             Button {
+                id: logButton
                 text: "Log activity"
                 onClicked: {
                     modal.openModal();
+                }
+            }
+            Button {
+                id: weekBack
+                anchors.left: logButton.right
+                anchors.leftMargin: 10
+                height: parent.height
+                width: backIcon.width
+                Icon {
+                    id: backIcon
+                    icon: MD.icons.arrow_back
+                    size: 27
+                    color: systemPalette.buttonText
+                }
+                onClicked: {
+                    weekView.weekBackward();
+                }
+            }
+            Button {
+                id: weekForward
+                anchors.left: weekBack.right
+                anchors.leftMargin: 10
+                height: parent.height
+                width: fowardIcon.width
+                Icon {
+                    id: fowardIcon
+                    icon: MD.icons.arrow_forward
+                    size: 27
+                    color: systemPalette.buttonText
+                }
+                onClicked: {
+                    weekView.weekForward();
                 }
             }
             Button {
@@ -54,6 +91,7 @@ ApplicationWindow {
             contentWidth: parent.width
             clip: true
             WeekView {
+                id: weekView
             }
         }
     }

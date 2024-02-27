@@ -40,10 +40,7 @@ class GithubIssuesModel(QAbstractListModel):
 
     @Slot(str)
     def filterIssues(self, text: str):
-        self.beginRemoveRows(QModelIndex(), 0, 6)
-        self.filteredIssues = []
-        self.endRemoveRows()
-        self.beginInsertRows(QModelIndex(), 0, 6)
+        self.beginResetModel()
         if text == "":
             self.reset()
         else:
@@ -57,18 +54,15 @@ class GithubIssuesModel(QAbstractListModel):
                 ),
             )
             self.filteredIssues = [x[0] for x in result]
-        self.endInsertRows()
+        self.endResetModel()
 
     @Slot()
     def updateIssues(self):
         def internal():
             self.issues = syncIssues()
-            self.beginRemoveRows(QModelIndex(), 0, 6)
-            self.filteredIssues = []
-            self.endRemoveRows()
-            self.beginInsertRows(QModelIndex(), 0, 6)
+            self.beginResetModel()
             self.reset()
-            self.endInsertRows()
+            self.endResetModel()
 
         backgroundFetch = Thread(target=internal)
         backgroundFetch.start()
