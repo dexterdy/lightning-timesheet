@@ -7,8 +7,6 @@ import "../icons/MaterialDesign.js" as MD
 ApplicationWindow {
     id: window
     visible: true
-    maximumWidth: 700
-    maximumHeight: 700
     minimumWidth: 700
     minimumHeight: 700
     title: "Lightning Timesheet"

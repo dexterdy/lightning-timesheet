@@ -48,12 +48,12 @@ class WeekDaysModel(QAbstractListModel):
     @Slot()
     def weekForward(self):
         self.startDay = self.startDay + timedelta(days=7)
-        self.updateDays()
+        self.updateDays(self.backend.timeSheet)
 
     @Slot()
     def weekBackward(self):
         self.startDay = self.startDay - timedelta(days=7)
-        self.updateDays()
+        self.updateDays(self.backend.timeSheet)
 
     def data(self, index: QModelIndex, role: int = 0) -> Any:
         if 0 <= index.row() < self.rowCount():
