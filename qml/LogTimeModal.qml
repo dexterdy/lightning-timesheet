@@ -66,7 +66,6 @@ Popup {
                             maximumLength: 4
                             width: parent.width / 2 - 10 / 3
                             placeholderText: "YYYY"
-                            text: backend.defaultYear
                         }
                         TextField {
                             id: month
@@ -75,7 +74,6 @@ Popup {
                             maximumLength: 2
                             width: parent.width / 4 - 10 / 3
                             placeholderText: "MM"
-                            text: backend.defaultMonth
                         }
                         TextField {
                             id: day
@@ -84,7 +82,6 @@ Popup {
                             maximumLength: 2
                             width: parent.width / 4 - 10 / 3
                             placeholderText: "DD"
-                            text: backend.defaultDay
                         }
                     }
                     Row {
@@ -149,7 +146,6 @@ Popup {
                         Layout.preferredHeight: atOffice.height
                         CheckBox {
                             id: atOffice
-                            checkState: Qt.Checked
                         }
                         Label {
                             text: "At the office"
@@ -198,14 +194,14 @@ Popup {
                             err = backend.submit();
                         error.text = err;
                         if (err === "")
-                            resetUI();
+                            close();
                     }
                 }
                 Button {
                     text: "Cancel"
                     onClicked: {
                         backend.reset();
-                        resetUI();
+                        close();
                     }
                 }
             }
@@ -222,6 +218,7 @@ Popup {
         modalContainer.open();
         ticketInput.updateIssues();
         userStoryInput.updateIssues();
+        resetUI();
     }
     function checkRequiredFields() {
         let error = false;
@@ -237,14 +234,16 @@ Popup {
     function resetUI() {
         ticketInput.reset();
         userStoryInput.reset();
-        year.text = backend.defaultYear;
-        month.text = backend.defaultMonth;
-        day.text = backend.defaultDay;
-        fromHour.text = "";
-        fromMinute.text = "";
-        tillHour.text = "";
-        tillMinute.text = "";
-        description.text = "";
-        modalContainer.close();
+        ticketInput.text = backend.initialTicketText();
+        userStoryInput.text = backend.initialUserStoryText();
+        year.text = backend.initialYear();
+        month.text = backend.initialMonth();
+        day.text = backend.initialDay();
+        fromHour.text = backend.initialFromHour();
+        fromMinute.text = backend.initialFromMinute();
+        tillHour.text = backend.initialTillHour();
+        tillMinute.text = backend.initialTillMinute();
+        description.text = backend.initialDescription();
+        atOffice.checkState = backend.initialAtOffice() ? Qt.Checked : Qt.Unchecked;
     }
 }

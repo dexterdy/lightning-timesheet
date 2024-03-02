@@ -104,9 +104,16 @@ class LogsModel(QAbstractListModel):
                 elif field == "title":
                     issue = getTicket(log.ticket)
                     return getattr(issue, field)
+                else:
+                    return getattr(log, field)
 
     def roleNames(self) -> dict[int, bytes]:
-        d = {0: "fromTime".encode(), 1: "tillTime".encode(), 2: "title".encode()}
+        d = {
+            0: "fromTime".encode(),
+            1: "tillTime".encode(),
+            2: "title".encode(),
+            3: "index".encode(),
+        }
         return d
 
     def get_logs(self) -> QObject:

@@ -2,6 +2,7 @@ from datetime import datetime, date
 import typing
 from PySide6.QtCore import QObject, Slot, Property, Signal
 from QtObjectWrapper import Wrapper
+from getIssueFromInt import getTicket
 from githubWrapper import getIssues, syncIssues
 import json
 from export import exportMD, exportExcel
@@ -18,8 +19,9 @@ def loadJson() -> list[Log]:
         with open("storedLogs.json", "r") as storeFile:
             timeSheet: list[dict[str, typing.Any]] = json.load(storeFile)["timeSheet"]
 
-    def convertDate(entry: dict[str, str]) -> Log:
+    def toLog(entry: dict[str, str], index: int) -> Log:
         return Log(
+            index=index,
             ticket=int(entry["ticket"]),
             userStory=int(entry["userStory"]) if entry["userStory"] else None,
             description=entry["description"],
@@ -28,7 +30,7 @@ def loadJson() -> list[Log]:
             atOffice=bool(entry["atOffice"]),
         )
 
-    return list(map(convertDate, timeSheet))
+    return list(map(lambda x: toLog(x[1], x[0]), enumerate(timeSheet)))
 
 
 def storeJson(timeSheet: list[Log]):
@@ -52,6 +54,8 @@ def storeJson(timeSheet: list[Log]):
 class Backend(QObject):
     def __init__(self, timeSheet: list[Log]):
         super().__init__()
+        # if not none, we are in editing mode. Otherwise, we are in write mode
+        self.editingLog: int | None = None
         self.selectedTicket: int | None = None
         self.selectedUserStory: int | None = None
         self.date: date = date.today()
@@ -60,6 +64,17 @@ class Backend(QObject):
         self.description: str = ""
         self.atOffice = True
         self._timeSheet = timeSheet
+
+    @Slot(int)
+    def setEditMode(self, index: int):
+        self.editingLog = index
+        self.selectedTicket = self._timeSheet[index].ticket
+        self.selectedUserStory = self._timeSheet[index].userStory
+        self.date = self._timeSheet[index].fromTime.date()
+        self.fromTime = self._timeSheet[index].fromTime
+        self.tillTime = self._timeSheet[index].tillTime
+        self.description = self._timeSheet[index].description
+        self.atOffice = self._timeSheet[index].atOffice
 
     @Slot(int)
     def selectTicket(self, number: int):
@@ -120,8 +135,9 @@ class Backend(QObject):
             return "All required fields must be set before submission."
         if self.tillTime <= self.fromTime:
             return "'Till' time must be later than 'From' time."
-        self._timeSheet.append(
-            Log(
+        if self.editingLog is not None:
+            self._timeSheet[self.editingLog] = Log(
+                self.editingLog,
                 ticket=self.selectedTicket,
                 userStory=self.selectedUserStory,
                 fromTime=self.fromTime,
@@ -129,7 +145,19 @@ class Backend(QObject):
                 description=self.description,
                 atOffice=self.atOffice,
             )
-        )
+            self.editingLog = None
+        else:
+            self._timeSheet.append(
+                Log(
+                    len(self._timeSheet),
+                    ticket=self.selectedTicket,
+                    userStory=self.selectedUserStory,
+                    fromTime=self.fromTime,
+                    tillTime=self.tillTime,
+                    description=self.description,
+                    atOffice=self.atOffice,
+                )
+            )
         storeJson(self._timeSheet)
         self.timesheetChanged.emit(self.timeSheet)
         self.reset()
@@ -137,6 +165,7 @@ class Backend(QObject):
 
     @Slot()
     def reset(self):
+        self.editingLog = None
         self.selectedTicket = None
         self.selectedUserStory = None
         self.date = date.today()
@@ -154,17 +183,61 @@ class Backend(QObject):
         elif type == 2:
             exportExcel(self._timeSheet, getIssues())
 
-    @Property(str, constant=True)  # type: ignore
-    def defaultYear(self):
+    @Slot(result=str)
+    def initialYear(self):
         return str(self.date.year)
 
-    @Property(str, constant=True)  # type: ignore
-    def defaultMonth(self):
+    @Slot(result=str)
+    def initialMonth(self):
         return "%02d" % self.date.month
 
-    @Property(str, constant=True)  # type: ignore
-    def defaultDay(self):
+    @Slot(result=str)
+    def initialDay(self):
         return "%02d" % self.date.day
+
+    @Slot(result=str)
+    def initialTicketText(self):
+        if self.selectedTicket is None:
+            return ""
+        return getTicket(self.selectedTicket).title
+
+    @Slot(result=str)
+    def initialUserStoryText(self):
+        if self.selectedUserStory is None:
+            return ""
+        return getTicket(self.selectedUserStory).title
+
+    @Slot(result=str)
+    def initialFromHour(self):
+        if self.fromTime is None:
+            return ""
+        return "%02d" % self.fromTime.hour
+
+    @Slot(result=str)
+    def initialFromMinute(self):
+        if self.fromTime is None:
+            return ""
+        return "%02d" % self.fromTime.minute
+
+    @Slot(result=str)
+    def initialTillHour(self):
+        if self.tillTime is None:
+            return ""
+        return "%02d" % self.tillTime.hour
+
+    @Slot(result=str)
+    def initialTillMinute(self):
+        if self.tillTime is None:
+            return ""
+        return "%02d" % self.tillTime.minute
+
+    @Slot(result=str)
+    def initialDescription(self):
+        return self.description
+
+    @Slot(result=bool)
+    def initialAtOffice(self):
+        return self.atOffice
 
     timesheetChanged = Signal(QObject)
 

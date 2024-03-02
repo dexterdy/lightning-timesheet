@@ -2,13 +2,12 @@ import QtQuick.Controls
 import QtQuick
 import WeekDaysModel
 import LogsModel
+import QtQml
 
 //TODO: Add days of the week at the top
 //TODO: add time and column markers
-//TODO: add ticket title to time box
 //TODO: make time box clickable
 //TODO: enter into edit mode
-//TODO: make sure that any changes to timesheet is reflected graphically
 //TODO: make week selector and other important ui elements
 Row {
     height: 2400
@@ -39,6 +38,15 @@ Row {
                         height: parent.height - 10
                         text: title
                         wrapMode: Text.WordWrap
+                    }
+                    TapHandler {
+                        onTapped: {
+                            backend.setEditMode(index);
+                            modal.openModal();
+                        }
+                    }
+                    HoverHandler {
+                        cursorShape: Qt.PointingHandCursor
                     }
                 }
             }
