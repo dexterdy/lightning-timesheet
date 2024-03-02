@@ -68,17 +68,30 @@ ApplicationWindow {
                     backend.weekForward();
                 }
             }
+            Text {
+                id: timeThisWeek
+                anchors.right: excel.left
+                anchors.rightMargin: 10
+                height: parent.height
+                color: systemPalette.buttonText
+                verticalAlignment: Text.AlignVCenter
+                text: {
+                    const time = backend.hours;
+                    return `${time[0]} hours ${time[1]} minutes`;
+                }
+            }
+            Button {
+                id: excel
+                anchors.rightMargin: 10
+                anchors.right: markdown.left
+                text: "Export as excel"
+                onClicked: backend.export(2)
+            }
             Button {
                 id: markdown
                 anchors.right: parent.right
                 text: "Export as markdown"
                 onClicked: backend.export(1)
-            }
-            Button {
-                anchors.rightMargin: 10
-                anchors.right: markdown.left
-                text: "Export as excel"
-                onClicked: backend.export(2)
             }
         }
         ScrollView {

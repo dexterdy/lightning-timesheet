@@ -163,6 +163,7 @@ class Backend(QObject):
             )
         storeJson(self._timeSheet)
         self.timesheetChanged.emit(self.timeSheet)
+        self.hoursChanged.emit(self.hours)
         self.reset()
         return ""
 
@@ -248,8 +249,10 @@ class Backend(QObject):
     def timeSheet(self) -> Wrapper[list[Log]]:
         return Wrapper(self._timeSheet)
 
-    @Slot(result="QVariantList")  # type: ignore
-    def getHours(self) -> list[int]:
+    hoursChanged = Signal("QVariantList")  # type: ignore
+
+    @Property("QVariantList", notify=hoursChanged)  # type: ignore
+    def hours(self) -> list[int]:
         fromTime = datetime.combine(self._startDay, datetime.min.time())
         tillTime = datetime.combine(
             self._startDay + timedelta(days=6), datetime.max.time()
@@ -266,11 +269,13 @@ class Backend(QObject):
     def weekForward(self):
         self._startDay = self._startDay + timedelta(days=7)
         self.startDayChanged.emit(self.startDay)
+        self.hoursChanged.emit(self.hours)
 
     @Slot()
     def weekBackward(self):
         self._startDay = self._startDay - timedelta(days=7)
         self.startDayChanged.emit(self.startDay)
+        self.hoursChanged.emit(self.hours)
 
     startDayChanged = Signal(QObject)
 
