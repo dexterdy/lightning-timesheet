@@ -101,6 +101,7 @@ ApplicationWindow {
             contentHeight: 2400
             contentWidth: parent.width
             clip: true
+            ScrollBar.vertical.position: (1 - ScrollBar.vertical.size) - 0.35
             WeekView {
                 id: weekView
             }
