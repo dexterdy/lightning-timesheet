@@ -22,18 +22,20 @@ QML_IMPORT_MAJOR_VERSION = 1
 class WeekDaysModel(QAbstractListModel):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
-        today = date.today()
-        weekday = today.isoweekday()
-        self.startDay = today - timedelta(days=weekday - 1)
         self.backend = getBackend()
         self.days: list[list[Log]] = [[] for _ in range(7)]
-        self.updateDays(self.backend.timeSheet)
-        self.backend.timesheetChanged.connect(self.updateDays)
+        self.updateDays(self.backend.timeSheet, self.backend.startDay)
+        self.backend.timesheetChanged.connect(
+            lambda x: self.updateDays(x, self.backend.startDay)
+        )
+        self.backend.startDayChanged.connect(
+            lambda x: self.updateDays(self.backend.timeSheet, x)
+        )
 
     @Slot()
-    def updateDays(self, timeSheet: Wrapper[list[Log]]):
+    def updateDays(self, timeSheet: Wrapper[list[Log]], startDay: Wrapper[date]):
         self.beginResetModel()
-        week = self.startDay.isocalendar().week
+        week = startDay.obj.isocalendar().week
         self.days = [[] for _ in range(7)]
         for log in timeSheet.obj:
             if log.fromTime.isocalendar().week == week:
@@ -45,19 +47,9 @@ class WeekDaysModel(QAbstractListModel):
                 self.days[log.tillTime.isocalendar().weekday - 1].append(log)
         self.endResetModel()
 
-    @Slot()
-    def weekForward(self):
-        self.startDay = self.startDay + timedelta(days=7)
-        self.updateDays(self.backend.timeSheet)
-
-    @Slot()
-    def weekBackward(self):
-        self.startDay = self.startDay - timedelta(days=7)
-        self.updateDays(self.backend.timeSheet)
-
     def data(self, index: QModelIndex, role: int = 0) -> Any:
         if 0 <= index.row() < self.rowCount():
-            day = self.startDay + timedelta(days=index.row())
+            day: date = self.backend.startDay.obj + timedelta(days=index.row())
             field = self.roleNames().get(role)
             if field:
                 field = field.decode()

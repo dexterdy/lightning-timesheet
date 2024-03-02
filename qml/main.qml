@@ -49,7 +49,7 @@ ApplicationWindow {
                     color: systemPalette.buttonText
                 }
                 onClicked: {
-                    weekView.weekBackward();
+                    backend.weekBackward();
                 }
             }
             Button {
@@ -65,7 +65,7 @@ ApplicationWindow {
                     color: systemPalette.buttonText
                 }
                 onClicked: {
-                    weekView.weekForward();
+                    backend.weekForward();
                 }
             }
             Button {

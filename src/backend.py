@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 import typing
 from PySide6.QtCore import QObject, Slot, Property, Signal
 from QtObjectWrapper import Wrapper
@@ -64,6 +64,9 @@ class Backend(QObject):
         self.description: str = ""
         self.atOffice = True
         self._timeSheet = timeSheet
+        today = date.today()
+        weekday = today.isoweekday()
+        self._startDay = today - timedelta(days=weekday - 1)
 
     @Slot(int)
     def setEditMode(self, index: int):
@@ -242,8 +245,38 @@ class Backend(QObject):
     timesheetChanged = Signal(QObject)
 
     @Property(QObject, notify=timesheetChanged)  # type: ignore
-    def timeSheet(self) -> QObject:
+    def timeSheet(self) -> Wrapper[list[Log]]:
         return Wrapper(self._timeSheet)
+
+    @Slot(result="QVariantList")  # type: ignore
+    def getHours(self) -> list[int]:
+        fromTime = datetime.combine(self._startDay, datetime.min.time())
+        tillTime = datetime.combine(
+            self._startDay + timedelta(days=6), datetime.max.time()
+        )
+        totalSeconds = 0
+        for log in self._timeSheet:
+            if log.fromTime <= tillTime and log.tillTime >= fromTime:
+                lFromTime = max(log.fromTime, fromTime)
+                lTillTime = min(log.tillTime, tillTime)
+                totalSeconds += (lTillTime - lFromTime).total_seconds()
+        return [int(totalSeconds // 3600), int((totalSeconds % 3600) // 60)]
+
+    @Slot()
+    def weekForward(self):
+        self._startDay = self._startDay + timedelta(days=7)
+        self.startDayChanged.emit(self.startDay)
+
+    @Slot()
+    def weekBackward(self):
+        self._startDay = self._startDay - timedelta(days=7)
+        self.startDayChanged.emit(self.startDay)
+
+    startDayChanged = Signal(QObject)
+
+    @Property(QObject, notify=startDayChanged)  # type: ignore
+    def startDay(self) -> Wrapper[date]:
+        return Wrapper(self._startDay)
 
 
 # I could implement some safety thing that makes sure only one backend exists, but meh.
