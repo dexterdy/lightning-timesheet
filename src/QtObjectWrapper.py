@@ -1,5 +1,5 @@
 import typing
-from PySide6.QtCore import QObject, Slot, Property
+from PySide6.QtCore import QObject
 
 T = typing.TypeVar("T")
 

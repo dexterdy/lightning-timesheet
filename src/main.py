@@ -7,8 +7,6 @@ createBackend()
 import sys
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
-from githubIssuesModel import GithubIssuesModel
-from weekDaysModel import WeekDaysModel, LogsModel
 
 app = QGuiApplication(sys.argv)
 engine = QQmlApplicationEngine()

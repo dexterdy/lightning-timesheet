@@ -3,7 +3,7 @@ import typing
 from PySide6.QtCore import QObject, Slot, Property, Signal
 from QtObjectWrapper import Wrapper
 from getIssueFromInt import getTicket
-from githubWrapper import getIssues, syncIssues
+from githubWrapper import getIssues
 import json
 from export import exportMD, exportExcel
 from logType import Log
